@@ -7,7 +7,7 @@ import {
   StyleSheet,
 } from '@react-pdf/renderer'
 import { formatPrice, formatDate } from '@/lib/formatters'
-import { getPdfLabels } from '@/lib/pdf-generator'
+import { getPdfLabels, type MeasuredPartnerLogo } from '@/lib/pdf-generator'
 import type { QuoteWithDetails, CompanySettings, BoatSpec, PartnerLogo } from '@/types'
 
 interface PDFDetailedTemplateProps {
@@ -15,7 +15,7 @@ interface PDFDetailedTemplateProps {
   settings: CompanySettings
   barcodeDataUrl?: string | null
   boatSpecs?: BoatSpec[]
-  partnerLogos?: PartnerLogo[]
+  partnerLogos?: (PartnerLogo & Partial<Pick<MeasuredPartnerLogo, 'aspectRatio'>>)[]
 }
 
 const NAVY = '#1a1a2e'
@@ -63,15 +63,18 @@ const s = StyleSheet.create({
 
   // ── Partner logos row ──
   partnerLogosRow: {
+    alignSelf: 'stretch',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 6,
   },
-  partnerLogo: {
-    height: 22,
-    width: 55,
-    objectFit: 'contain',
+  partnerLogosRowSingle: {
+    alignSelf: 'stretch',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 6,
   },
 
   // ── Header ──
@@ -352,7 +355,7 @@ const s = StyleSheet.create({
     color: TEXT_DARK,
   },
 
-  // ── Pricing summary (full-width 3-col) ──
+  // ── Pricing summary (unified TOTAL / DISCOUNT + grand total box) ──
   pricingWrap: {
     flexDirection: 'row',
     marginTop: 8,
@@ -360,21 +363,12 @@ const s = StyleSheet.create({
     borderTopWidth: 1.5,
     borderTopColor: NAVY,
   },
-  pricingCol: {
+  pricingSummary: {
     flex: 1,
-    paddingVertical: 8,
-    paddingHorizontal: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
     backgroundColor: BG_LIGHT,
-  },
-  pricingColMid: {
-    flex: 1,
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-    backgroundColor: BG_LIGHT,
-    borderLeftWidth: 0.5,
-    borderLeftColor: BORDER_LIGHT,
-    borderRightWidth: 0.5,
-    borderRightColor: BORDER_LIGHT,
+    justifyContent: 'center',
   },
   pricingColTotal: {
     width: 155,
@@ -384,51 +378,35 @@ const s = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  pColTitle: {
-    fontSize: 6,
+  pSumRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'baseline',
+    paddingVertical: 2.5,
+  },
+  pSumLbl: {
+    fontSize: 8,
     fontWeight: 700,
     textTransform: 'uppercase',
     letterSpacing: 1.2,
     color: TEXT_SECONDARY,
-    marginBottom: 4,
   },
-  pRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 1.5,
-  },
-  pLbl: {
-    fontSize: 7.5,
-    color: TEXT_SECONDARY,
-  },
-  pVal: {
-    fontSize: 7.5,
-    fontWeight: 500,
-    color: TEXT_DARK,
-  },
-  pDiscLbl: {
-    fontSize: 7.5,
-    color: DISCOUNT_RED,
-  },
-  pDiscVal: {
-    fontSize: 7.5,
-    fontWeight: 500,
-    color: DISCOUNT_RED,
-  },
-  pDiv: {
-    borderBottomWidth: 0.5,
-    borderBottomColor: '#ddd',
-    marginVertical: 2,
-  },
-  pNetLbl: {
-    fontSize: 8,
+  pSumVal: {
+    fontSize: 9.5,
     fontWeight: 700,
     color: TEXT_DARK,
   },
-  pNetVal: {
+  pSumDiscLbl: {
     fontSize: 8,
     fontWeight: 700,
-    color: TEXT_DARK,
+    textTransform: 'uppercase',
+    letterSpacing: 1.2,
+    color: DISCOUNT_RED,
+  },
+  pSumDiscVal: {
+    fontSize: 9.5,
+    fontWeight: 700,
+    color: DISCOUNT_RED,
   },
   pTotalLbl: {
     fontSize: 8,
@@ -641,13 +619,13 @@ export function PDFDetailedTemplate({
     ? (quote.payment_terms_hr ?? quote.payment_terms_en ?? '')
     : (quote.payment_terms_en ?? quote.payment_terms_hr ?? '')
 
-  // Pricing
+  // Pricing — boat and equipment combined per client request (no split in summary)
   const boatBasePrice = Number(quote.boat_base_price ?? 0)
   const boatDiscountAmount = Number(quote.boat_discount ?? 0)
-  const boatNet = boatBasePrice - boatDiscountAmount
   const equipmentSubtotal = Number(quote.equipment_subtotal ?? 0)
   const equipmentDiscountAmount = Number(quote.equipment_discount ?? 0)
-  const equipmentNet = equipmentSubtotal - equipmentDiscountAmount
+  const totalBeforeDiscount = boatBasePrice + equipmentSubtotal
+  const totalDiscountAmount = boatDiscountAmount + equipmentDiscountAmount
   const grandTotal = Number(quote.total_price ?? 0)
 
   const terms = lang === 'hr' ? settings.terms_hr : settings.terms_en
@@ -668,28 +646,52 @@ export function PDFDetailedTemplate({
     return labels.scanToPay
   })()
 
-  // Discount labels with percentage
-  const boatDiscountLabel = (() => {
-    const boatPctDiscount = quote.discounts?.find(
-      d => d.discount_level === 'boat_base' && d.discount_type === 'percentage'
-    )
-    if (boatPctDiscount) {
-      return `${labels.discount} (${Number(boatPctDiscount.value)}%)`
+  // Show a percentage next to the combined discount only when every discount on
+  // the quote is the same single percentage AND it reproduces the combined amount
+  // (guards against boat-only %, fixed amounts, per-item stacking, non-discountable items)
+  const uniformDiscountPct = (() => {
+    if (totalDiscountAmount <= 0) return null
+    const discountList = quote.discounts ?? []
+    if (discountList.length === 0) return null
+    const pctValues = new Set<number>()
+    for (const d of discountList) {
+      if (d.discount_type !== 'percentage') return null
+      pctValues.add(Number(d.value))
     }
-    return labels.discount
+    if (pctValues.size !== 1) return null
+    const pct = [...pctValues][0]
+    if (Math.abs(totalBeforeDiscount * (pct / 100) - totalDiscountAmount) > 1) return null
+    return pct
   })()
 
-  const equipmentDiscountLabel = (() => {
-    const equipAllPctDiscount = quote.discounts?.find(
-      d => d.discount_level === 'equipment_all' && d.discount_type === 'percentage'
-    )
-    if (equipAllPctDiscount) {
-      return `${labels.equipmentDiscounts} (${Number(equipAllPctDiscount.value)}%)`
-    }
-    return labels.equipmentDiscounts
-  })()
+  const combinedDiscountLabel = uniformDiscountPct != null
+    ? `${labels.discount} (${uniformDiscountPct}%)`
+    : labels.discount
 
-  const hasPartnerLogos = partnerLogos && partnerLogos.length > 0
+  // Footer logos — each logo's width follows its real aspect ratio so the visual
+  // gaps between logos come out equal (fixed-width boxes centered narrow logos and
+  // made gaps look uneven). If the row would overflow, everything scales down
+  // proportionally so all logos always fit in one row.
+  const LOGO_H = 22
+  const LOGO_MAX_W = 80
+  const LOGO_MIN_GAP = 12
+  const FOOTER_W = 523 // A4 595pt − 2 × 36pt horizontal padding
+
+  const sizedLogos = (partnerLogos ?? []).map((pl) => {
+    const ratio = pl.aspectRatio ?? null
+    if (!ratio || ratio <= 0) {
+      // Measurement unavailable — fall back to the old fixed box
+      return { ...pl, w: 55, h: LOGO_H }
+    }
+    const w = Math.min(LOGO_H * ratio, LOGO_MAX_W)
+    return { ...pl, w, h: w / ratio }
+  })
+  const logosTotalWidth = sizedLogos.reduce((sum, l) => sum + l.w, 0)
+  const logoScale = sizedLogos.length > 1
+    ? Math.min(1, (FOOTER_W - LOGO_MIN_GAP * (sizedLogos.length - 1)) / logosTotalWidth)
+    : 1
+
+  const hasPartnerLogos = sizedLogos.length > 0
 
   const renderStdColumn = (entries: [string, string[]][], isFirst: boolean) => (
     <View style={s.stdCol}>
@@ -708,9 +710,13 @@ export function PDFDetailedTemplate({
         {/* Fixed footer — partner logos + registration text on every page */}
         <View style={s.footerWrap} fixed>
           {hasPartnerLogos && (
-            <View style={s.partnerLogosRow}>
-              {partnerLogos!.map((pl) => (
-                <Image key={pl.id} src={pl.logo_url} style={s.partnerLogo} />
+            <View style={sizedLogos.length === 1 ? s.partnerLogosRowSingle : s.partnerLogosRow}>
+              {sizedLogos.map((pl) => (
+                <Image
+                  key={pl.id}
+                  src={pl.logo_url}
+                  style={{ width: pl.w * logoScale, height: pl.h * logoScale, objectFit: 'contain' }}
+                />
               ))}
             </View>
           )}
@@ -932,49 +938,22 @@ export function PDFDetailedTemplate({
           </>
         )}
 
-        {/* Pricing Summary — 3 columns */}
+        {/* Pricing Summary — combined TOTAL / DISCOUNT + Grand Total box */}
         <View style={s.pricingWrap} wrap={false}>
-          {/* Col 1: Boat */}
-          <View style={s.pricingCol}>
-            <Text style={s.pColTitle}>{labels.boatDetails}</Text>
-            <View style={s.pRow}>
-              <Text style={s.pLbl}>{labels.basePrice}</Text>
-              <Text style={s.pVal}>{formatPrice(boatBasePrice)}</Text>
+          <View style={s.pricingSummary}>
+            <View style={s.pSumRow}>
+              <Text style={s.pSumLbl}>{labels.total}</Text>
+              <Text style={s.pSumVal}>{formatPrice(totalBeforeDiscount)}</Text>
             </View>
-            {boatDiscountAmount > 0 && (
-              <View style={s.pRow}>
-                <Text style={s.pDiscLbl}>{boatDiscountLabel}</Text>
-                <Text style={s.pDiscVal}>-{formatPrice(boatDiscountAmount)}</Text>
+            {totalDiscountAmount > 0 && (
+              <View style={s.pSumRow}>
+                <Text style={s.pSumDiscLbl}>{combinedDiscountLabel}</Text>
+                <Text style={s.pSumDiscVal}>-{formatPrice(totalDiscountAmount)}</Text>
               </View>
             )}
-            <View style={s.pDiv} />
-            <View style={s.pRow}>
-              <Text style={s.pNetLbl}>{labels.vesselNet}</Text>
-              <Text style={s.pNetVal}>{formatPrice(boatNet)}</Text>
-            </View>
           </View>
 
-          {/* Col 2: Equipment */}
-          <View style={s.pricingColMid}>
-            <Text style={s.pColTitle}>{labels.equipmentAndAddons}</Text>
-            <View style={s.pRow}>
-              <Text style={s.pLbl}>{labels.equipmentTotal}</Text>
-              <Text style={s.pVal}>{formatPrice(equipmentSubtotal)}</Text>
-            </View>
-            {equipmentDiscountAmount > 0 && (
-              <View style={s.pRow}>
-                <Text style={s.pDiscLbl}>{equipmentDiscountLabel}</Text>
-                <Text style={s.pDiscVal}>-{formatPrice(equipmentDiscountAmount)}</Text>
-              </View>
-            )}
-            <View style={s.pDiv} />
-            <View style={s.pRow}>
-              <Text style={s.pNetLbl}>{labels.equipmentNet}</Text>
-              <Text style={s.pNetVal}>{formatPrice(equipmentNet)}</Text>
-            </View>
-          </View>
-
-          {/* Col 3: Grand Total */}
+          {/* Grand Total */}
           <View style={s.pricingColTotal}>
             <Text style={s.pTotalLbl}>{labels.grandTotal}</Text>
             <Text style={s.pTotalVal}>{formatPrice(grandTotal)}</Text>
@@ -1071,8 +1050,8 @@ export function PDFDetailedTemplate({
           )}
         </View>
 
-        {/* Signatures — pushed to bottom of page */}
-        <View style={s.sigWrap}>
+        {/* Signatures — kept together: whole block moves to next page if it doesn't fit */}
+        <View style={s.sigWrap} wrap={false}>
           <View style={s.sigRow}>
             <View style={s.sigCol}>
               <View style={s.sigLine} />

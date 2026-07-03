@@ -165,19 +165,24 @@ export default function QuoteDetailPage() {
     const [
       { PDFDetailedTemplate },
       { generatePaymentBarcode },
+      { measurePartnerLogos },
     ] = await Promise.all([
       import('@/components/pdf/PDFDetailedTemplate'),
       import('@/lib/barcode-unified'),
+      import('@/lib/pdf-generator'),
     ])
 
-    const barcodeDataUrl = await generatePaymentBarcode(
-      q.quote_number,
-      Number(q.total_price ?? 0),
-      q.company?.name ?? '',
-      settings!,
-      q.language,
-      q.deposit_percentage,
-    )
+    const [barcodeDataUrl, measuredLogos] = await Promise.all([
+      generatePaymentBarcode(
+        q.quote_number,
+        Number(q.total_price ?? 0),
+        q.company?.name ?? '',
+        settings!,
+        q.language,
+        q.deposit_percentage,
+      ),
+      measurePartnerLogos(partnerLogos ?? []),
+    ])
 
     return (
       <PDFDetailedTemplate
@@ -185,7 +190,7 @@ export default function QuoteDetailPage() {
         settings={settings!}
         barcodeDataUrl={barcodeDataUrl}
         boatSpecs={boatData?.specs}
-        partnerLogos={partnerLogos ?? []}
+        partnerLogos={measuredLogos}
       />
     )
   }

@@ -416,7 +416,7 @@ export function useCreateQuote() {
           .from('contacts')
           .insert({
             full_name: clientData.name,
-            email: clientData.email,
+            email: clientData.email || null,
             phone: clientData.phone ?? null,
             company_id: companyId,
             is_primary: true,

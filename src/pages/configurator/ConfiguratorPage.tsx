@@ -78,7 +78,7 @@ export default function ConfiguratorPage() {
     switch (currentStep) {
       case 1: return selectedBoat !== null
       case 2: return true
-      case 3: return clientData.name.trim() !== '' && clientData.email.includes('@')
+      case 3: return clientData.name.trim() !== ''
       case 4: return false
     }
   })()

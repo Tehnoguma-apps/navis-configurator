@@ -1,5 +1,6 @@
 import { pdf, Font, type DocumentProps } from '@react-pdf/renderer'
 import type { ReactElement } from 'react'
+import type { PartnerLogo } from '@/types'
 
 let fontsRegistered = false
 
@@ -32,6 +33,29 @@ export async function generatePDF(document: ReactElement<DocumentProps>): Promis
   registerFonts()
   const blob = await pdf(document).toBlob()
   return blob
+}
+
+export type MeasuredPartnerLogo = PartnerLogo & { aspectRatio: number | null }
+
+/**
+ * Measure the intrinsic aspect ratio of each partner logo in the browser so the
+ * PDF footer can size logos proportionally (equal visual gaps between them).
+ * A logo that fails to load gets aspectRatio: null and falls back to the
+ * fixed-box rendering — PDF generation never fails because of a logo.
+ */
+export async function measurePartnerLogos(logos: PartnerLogo[]): Promise<MeasuredPartnerLogo[]> {
+  return Promise.all(
+    logos.map(async (logo) => {
+      const aspectRatio = await new Promise<number | null>((resolve) => {
+        const img = new Image()
+        img.onload = () =>
+          resolve(img.naturalWidth > 0 && img.naturalHeight > 0 ? img.naturalWidth / img.naturalHeight : null)
+        img.onerror = () => resolve(null)
+        img.src = logo.logo_url
+      })
+      return { ...logo, aspectRatio }
+    }),
+  )
 }
 
 /**
@@ -123,7 +147,7 @@ const labelsHr: PdfLabels = {
   scanToPay: 'Skenirajte za uplatu',
   basePrice: 'Osnovna cijena',
   equipmentTotal: 'Ukupno oprema',
-  grandTotal: 'UKUPNO',
+  grandTotal: 'SVEUKUPNO',
   standard: 'Std.',
   quoteNumber: 'Ponuda br.',
   specifications: 'Specifikacije',

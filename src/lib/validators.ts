@@ -61,7 +61,7 @@ export const contactSchema = z.object({
 
 export const clientFormSchema = z.object({
   name: z.string().min(1, 'Name is required'),
-  email: z.string().email('Invalid email address'),
+  email: z.string().email('Invalid email address').or(z.literal('')),
   phone: z.string().optional(),
   companyName: z.string().optional(),
   notes: z.string().optional(),

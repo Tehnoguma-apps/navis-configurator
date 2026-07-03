@@ -94,7 +94,7 @@ export function ClientForm({ defaultValues, selectedCompany, selectedContact, on
         </div>
         <div>
           <label className={ds.input.label}>
-            {t('configurator.email')} <span className="text-red-500">*</span>
+            {t('configurator.email')}
           </label>
           <input
             type="email"
