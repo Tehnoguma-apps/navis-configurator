@@ -646,27 +646,49 @@ export function PDFDetailedTemplate({
     return labels.scanToPay
   })()
 
-  // Show a percentage next to the combined discount only when every discount on
-  // the quote is the same single percentage AND it reproduces the combined amount
-  // (guards against boat-only %, fixed amounts, per-item stacking, non-discountable items)
-  const uniformDiscountPct = (() => {
-    if (totalDiscountAmount <= 0) return null
+  // Combined discount label — boat and equipment stay on a single line (no split,
+  // per client request). Surface the discount rate(s) in the label:
+  //   • one uniform % across the whole quote → "Popust (12%)"
+  //   • distinct boat / equipment % (one % discount per level, no per-item ones)
+  //       → "Popust (brod 12% / oprema 8%)"
+  //   • anything else (fixed amounts, per-item, mixed) → plain "Popust"
+  const combinedDiscountLabel = (() => {
+    if (totalDiscountAmount <= 0) return labels.discount
     const discountList = quote.discounts ?? []
-    if (discountList.length === 0) return null
-    const pctValues = new Set<number>()
-    for (const d of discountList) {
-      if (d.discount_type !== 'percentage') return null
-      pctValues.add(Number(d.value))
-    }
-    if (pctValues.size !== 1) return null
-    const pct = [...pctValues][0]
-    if (Math.abs(totalBeforeDiscount * (pct / 100) - totalDiscountAmount) > 1) return null
-    return pct
-  })()
+    if (discountList.length === 0) return labels.discount
 
-  const combinedDiscountLabel = uniformDiscountPct != null
-    ? `${labels.discount} (${uniformDiscountPct}%)`
-    : labels.discount
+    // Uniform single percentage that reproduces the combined amount
+    const allPercentage = discountList.every((d) => d.discount_type === 'percentage')
+    const pctValues = new Set(discountList.map((d) => Number(d.value)))
+    if (allPercentage && pctValues.size === 1) {
+      const pct = [...pctValues][0]
+      if (Math.abs(totalBeforeDiscount * (pct / 100) - totalDiscountAmount) <= 1) {
+        return `${labels.discount} (${pct}%)`
+      }
+    }
+
+    // Distinct boat / equipment percentages — exactly one % discount on each level,
+    // and no per-item discounts that a boat/equipment breakdown would misrepresent
+    const levelPct = (level: string): number | null => {
+      const rows = discountList.filter((d) => d.discount_level === level)
+      if (rows.length !== 1 || rows[0].discount_type !== 'percentage') return null
+      const v = Number(rows[0].value)
+      return v > 0 ? v : null
+    }
+    const hasPerItem = discountList.some((d) => d.discount_level === 'equipment_item')
+    if (!hasPerItem) {
+      const boatPct = levelPct('boat_base')
+      const equipPct = levelPct('equipment_all')
+      const boatWord = lang === 'hr' ? 'brod' : 'boat'
+      const equipWord = lang === 'hr' ? 'oprema' : 'equipment'
+      const parts: string[] = []
+      if (boatPct != null) parts.push(`${boatWord} ${boatPct}%`)
+      if (equipPct != null) parts.push(`${equipWord} ${equipPct}%`)
+      if (parts.length > 0) return `${labels.discount} (${parts.join(' / ')})`
+    }
+
+    return labels.discount
+  })()
 
   // Footer logos — each logo's width follows its real aspect ratio so the visual
   // gaps between logos come out equal (fixed-width boxes centered narrow logos and
