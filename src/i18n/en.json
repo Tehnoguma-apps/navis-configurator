@@ -479,6 +479,7 @@
     "includeVAT": "Include VAT in price",
     "vatPercentage": "VAT %",
     "vatAmount": "VAT",
+    "totalExclVat": "Total excl. VAT",
     "grandTotalWithVAT": "Grand Total (incl. VAT)",
     "quoteOptions": "Quote Options",
     "deliveryTermsSaved": "Delivery terms saved",

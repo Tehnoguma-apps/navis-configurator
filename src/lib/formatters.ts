@@ -4,8 +4,11 @@
  */
 export function formatPrice(amount: number, currency = 'EUR'): string {
   const symbol = currency === 'EUR' ? '€' : currency
+  // Whole amounts print without decimals; any cents print as two digits
+  // (€871.624,50, never €871.624,5).
+  const hasCents = Math.round(amount * 100) % 100 !== 0
   const formatted = new Intl.NumberFormat('de-DE', {
-    minimumFractionDigits: 0,
+    minimumFractionDigits: hasCents ? 2 : 0,
     maximumFractionDigits: 2,
   }).format(amount)
   return `${symbol}${formatted}`

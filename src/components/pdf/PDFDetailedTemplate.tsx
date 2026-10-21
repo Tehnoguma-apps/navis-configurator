@@ -6,8 +6,10 @@ import {
   Image,
   StyleSheet,
 } from '@react-pdf/renderer'
+import { Fragment } from 'react'
 import { formatPrice, formatDate } from '@/lib/formatters'
 import { getPdfLabels, type MeasuredPartnerLogo } from '@/lib/pdf-generator'
+import { calculateVat } from '@/lib/pricing'
 import type { QuoteWithDetails, CompanySettings, BoatSpec, PartnerLogo } from '@/types'
 
 interface PDFDetailedTemplateProps {
@@ -263,38 +265,45 @@ const s = StyleSheet.create({
     backgroundColor: GOLD,
   },
 
-  // ── Standard equipment (2-col) ──
-  stdBox: {
-    backgroundColor: BG_LIGHT,
-    borderRadius: 2,
-    paddingVertical: 7,
-    paddingHorizontal: 10,
-    marginBottom: 10,
-  },
-  stdGrid: {
-    flexDirection: 'row',
-    gap: 14,
-  },
-  stdCol: {
-    flex: 1,
+  // ── Standard equipment (bulleted list, 3 columns, grouped by category) ──
+  stdWrap: {
+    marginBottom: 12,
   },
   stdCat: {
-    fontSize: 7.5,
+    fontSize: 6.5,
     fontWeight: 700,
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
     color: NAVY,
-    marginBottom: 1,
-    marginTop: 3,
+    paddingBottom: 2,
+    marginTop: 5,
+    marginBottom: 2,
+    borderBottomWidth: 0.5,
+    borderBottomColor: BORDER_LIGHT,
   },
-  stdCatFirst: {
-    fontSize: 7.5,
-    fontWeight: 700,
-    color: NAVY,
-    marginBottom: 1,
+  stdRow: {
+    flexDirection: 'row',
+    gap: 10,
   },
-  stdItems: {
-    fontSize: 7,
+  stdCell: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    paddingVertical: 1,
+  },
+  stdBullet: {
+    width: 2.2,
+    height: 2.2,
+    borderRadius: 1.1,
+    backgroundColor: GOLD,
+    marginTop: 3.2,
+    marginRight: 4,
+  },
+  stdText: {
+    flex: 1,
+    fontSize: 6.8,
     color: TEXT_BODY,
-    lineHeight: 1.35,
+    lineHeight: 1.3,
   },
 
   // ── Equipment table ──
@@ -304,6 +313,7 @@ const s = StyleSheet.create({
     borderBottomColor: NAVY,
     paddingBottom: 4,
     paddingTop: 2,
+    backgroundColor: '#ffffff',
   },
   tHeadText: {
     fontSize: 6,
@@ -422,6 +432,52 @@ const s = StyleSheet.create({
     fontWeight: 700,
     color: '#ffffff',
   },
+  pSumDivider: {
+    borderTopWidth: 0.5,
+    borderTopColor: '#d5d7dd',
+    marginVertical: 3,
+  },
+  pSumNetLbl: {
+    fontSize: 8,
+    fontWeight: 700,
+    textTransform: 'uppercase',
+    letterSpacing: 1.2,
+    color: NAVY,
+  },
+  pSumNetVal: {
+    fontSize: 9.5,
+    fontWeight: 700,
+    color: NAVY,
+  },
+  pSumVatLbl: {
+    fontSize: 7.5,
+    textTransform: 'uppercase',
+    letterSpacing: 1.2,
+    color: TEXT_SECONDARY,
+  },
+  pSumVatVal: {
+    fontSize: 9,
+    color: TEXT_DARK,
+  },
+  totalsNotes: {
+    marginTop: -8,
+    marginBottom: 12,
+    paddingHorizontal: 2,
+    gap: 2,
+  },
+  smallNote: {
+    fontSize: 7,
+    color: TEXT_BODY,
+  },
+  tbqNote: {
+    fontSize: 7,
+    color: '#92400e',
+  },
+  footnote: {
+    fontSize: 6.5,
+    color: TEXT_SECONDARY,
+    marginTop: 14,
+  },
 
   // ── Notes ──
   noteText: {
@@ -435,7 +491,7 @@ const s = StyleSheet.create({
   paySection: {
     flexDirection: 'row',
     gap: 16,
-    marginBottom: 14,
+    marginBottom: 10,
   },
   payLeft: {
     flex: 1,
@@ -492,7 +548,7 @@ const s = StyleSheet.create({
 
   // ── Terms ──
   termsWrap: {
-    paddingTop: 8,
+    paddingTop: 6,
     borderTopWidth: 0.5,
     borderTopColor: '#ddd',
     marginBottom: 10,
@@ -513,7 +569,7 @@ const s = StyleSheet.create({
 
   // ── Signatures ──
   sigWrap: {
-    marginTop: 24,
+    marginTop: 16,
   },
   sigRow: {
     flexDirection: 'row',
@@ -545,6 +601,40 @@ function splitHalf<T>(items: T[]): [T[], T[]] {
   const mid = Math.ceil(items.length / 2)
   return [items.slice(0, mid), items.slice(mid)]
 }
+
+function chunk<T>(items: T[], size: number): T[][] {
+  const rows: T[][] = []
+  for (let i = 0; i < items.length; i += size) rows.push(items.slice(i, i + size))
+  return rows
+}
+
+/**
+ * Standard equipment is often imported as one long comma-separated string
+ * ("STANDARD COLORS, Stern bimini, ..."). Split it into separate entries on
+ * top-level ", " only: commas inside brackets and decimal commas ("2,5 kW")
+ * stay intact.
+ */
+function splitStandardItem(name: string): string[] {
+  const parts: string[] = []
+  let depth = 0
+  let current = ''
+  for (let i = 0; i < name.length; i++) {
+    const ch = name[i]
+    if (ch === '(' || ch === '[') depth++
+    else if ((ch === ')' || ch === ']') && depth > 0) depth--
+    const next = name[i + 1]
+    if (ch === ',' && depth === 0 && (next === undefined || /\s/.test(next))) {
+      parts.push(current)
+      current = ''
+      continue
+    }
+    current += ch
+  }
+  parts.push(current)
+  return parts.map((p) => p.trim()).filter((p) => p.length > 0)
+}
+
+const STD_COLUMNS = 3
 
 export function PDFDetailedTemplate({
   quote,
@@ -578,7 +668,7 @@ export function PDFDetailedTemplate({
 
     if (isStandard) {
       const existing = standardByCategory.get(catName) ?? []
-      existing.push(itemName)
+      existing.push(...splitStandardItem(itemName))
       standardByCategory.set(catName, existing)
     } else {
       const existing = optionalByCategory.get(catName) ?? []
@@ -589,12 +679,7 @@ export function PDFDetailedTemplate({
 
   const hasStandard = standardByCategory.size > 0
   const hasOptional = optionalByCategory.size > 0
-
-  // Split standard categories into 2 columns for compact layout
-  const stdEntries = Array.from(standardByCategory.entries())
-  const stdMid = Math.ceil(stdEntries.length / 2)
-  const stdCol1 = stdEntries.slice(0, stdMid)
-  const stdCol2 = stdEntries.slice(stdMid)
+  const hasTbq = quote.items.some((i) => i.is_price_on_request)
 
   // Top specs — filter out price list region and prices note
   const excludedLabels = ['price list region', 'prices note', 'regija cjenika', 'napomena o cijenama']
@@ -631,8 +716,9 @@ export function PDFDetailedTemplate({
   const terms = lang === 'hr' ? settings.terms_hr : settings.terms_en
   const isQR = lang !== 'hr'
 
-  // VAT label
-  const vatLabel = quote.vat_included ? `(${labels.inclVat})` : `(${labels.exclVat})`
+  // VAT — every line price is net; VAT is only added in the totals block
+  const vatPct = Number(quote.vat_percentage ?? 25)
+  const { vatAmount, totalWithVat } = calculateVat(grandTotal, vatPct)
 
   // Barcode label
   const barcodeLabelText = (() => {
@@ -715,14 +801,36 @@ export function PDFDetailedTemplate({
 
   const hasPartnerLogos = sizedLogos.length > 0
 
-  const renderStdColumn = (entries: [string, string[]][], isFirst: boolean) => (
-    <View style={s.stdCol}>
-      {entries.map(([category, items], idx) => (
-        <View key={category}>
-          <Text style={idx === 0 && isFirst ? s.stdCatFirst : s.stdCat}>{category}</Text>
-          <Text style={s.stdItems}>{items.join(', ')}</Text>
+  // Rows are laid out left-to-right in STD_COLUMNS cells; each row is unbreakable,
+  // so the list flows across pages row by row.
+  // Title and rows are flat siblings inside the list (see optional table note).
+  const renderStdCategory = (category: string, items: string[]) => (
+    <Fragment key={category}>
+      <Text style={s.stdCat} minPresenceAhead={24}>{category}</Text>
+      {chunk(items, STD_COLUMNS).map((row, rowIdx) => (
+        <View key={rowIdx} style={s.stdRow} wrap={false}>
+          {Array.from({ length: STD_COLUMNS }, (_, col) => {
+            const text = row[col]
+            return (
+              <View key={col} style={s.stdCell}>
+                {text !== undefined && (
+                  <>
+                    <View style={s.stdBullet} />
+                    <Text style={s.stdText}>{text}</Text>
+                  </>
+                )}
+              </View>
+            )
+          })}
         </View>
       ))}
+    </Fragment>
+  )
+
+  const renderSecRow = (title: string) => (
+    <View style={s.secRow} minPresenceAhead={56}>
+      <Text style={s.secText}>{title}</Text>
+      <View style={s.secLine} />
     </View>
   )
 
@@ -838,7 +946,7 @@ export function PDFDetailedTemplate({
           <View style={s.vessel}>
             <Text style={s.vesselName}>{boat.name}</Text>
             <View style={s.vesselRight}>
-              <Text style={s.priceTag}>{labels.basePrice} {vatLabel}</Text>
+              <Text style={s.priceTag}>{labels.basePrice} ({labels.exclVat})</Text>
               <Text style={s.priceVal}>{formatPrice(boatBasePrice)}</Text>
             </View>
           </View>
@@ -870,29 +978,14 @@ export function PDFDetailedTemplate({
           )
         })()}
 
-        {/* Delivery Terms */}
-        {deliveryTermsText && (
-          <>
-            <View style={s.secRow}>
-              <Text style={s.secText}>{labels.deliveryTerms}</Text>
-              <View style={s.secLine} />
-            </View>
-            <Text style={s.noteText}>{deliveryTermsText}</Text>
-          </>
-        )}
-
         {/* Standard Equipment (conditional based on quote setting) */}
         {hasStandard && quote.include_standard_in_pdf !== false && (
           <>
-            <View style={s.secRow}>
-              <Text style={s.secText}>{labels.standardEquipment}</Text>
-              <View style={s.secLine} />
-            </View>
-            <View style={s.stdBox} wrap={false}>
-              <View style={s.stdGrid}>
-                {renderStdColumn(stdCol1, true)}
-                {stdCol2.length > 0 && renderStdColumn(stdCol2, false)}
-              </View>
+            {renderSecRow(labels.standardEquipment)}
+            <View style={s.stdWrap}>
+              {Array.from(standardByCategory.entries()).map(([category, items]) =>
+                renderStdCategory(category, items),
+              )}
             </View>
           </>
         )}
@@ -900,22 +993,24 @@ export function PDFDetailedTemplate({
         {/* Optional Equipment Table */}
         {hasOptional && (
           <>
-            <View style={s.secRow}>
-              <Text style={s.secText}>{labels.optionalEquipment}</Text>
-              <View style={s.secLine} />
-            </View>
+            {renderSecRow(labels.optionalEquipment)}
 
-            <View style={s.tHead}>
-              <Text style={[s.tHeadText, { width: '38%' }]}>{labels.item}</Text>
+            {/* Table: categories may break between rows; a single row never splits.
+                The header is `fixed`, so it repeats on every page the table spans. */}
+            <View>
+            <View style={s.tHead} fixed>
+              <Text style={[s.tHeadText, { width: '38%', paddingLeft: 6 }]}>{labels.item}</Text>
               <Text style={[s.tHeadText, { width: '8%', textAlign: 'center' }]}>{labels.quantity}</Text>
               <Text style={[s.tHeadText, { width: '16%', textAlign: 'right' }]}>{labels.unitPrice}</Text>
               <Text style={[s.tHeadText, { width: '14%', textAlign: 'right' }]}>{labels.discount}</Text>
               <Text style={[s.tHeadText, { width: '24%', textAlign: 'right' }]}>{labels.net}</Text>
             </View>
 
+            {/* Category header and rows are flat siblings of the table: react-pdf only
+                honours minPresenceAhead when the element has preceding siblings. */}
             {Array.from(optionalByCategory.entries()).map(([category, items]) => (
-              <View key={category} wrap={false}>
-                <View style={s.catHeader}>
+              <Fragment key={category}>
+                <View style={s.catHeader} minPresenceAhead={40}>
                   <Text style={s.catHeaderText}>{category}</Text>
                 </View>
                 {items.map((item) => {
@@ -934,7 +1029,7 @@ export function PDFDetailedTemplate({
                       : `-${formatPrice(itemDiscount)}`
                     : null
                   return (
-                    <View key={item.id} style={s.row}>
+                    <View key={item.id} style={s.row} wrap={false}>
                       <View style={{ width: '38%', paddingLeft: 6 }}>
                         <Text style={s.cellName}>{itemName ?? '—'}</Text>
                       </View>
@@ -955,12 +1050,14 @@ export function PDFDetailedTemplate({
                     </View>
                   )
                 })}
-              </View>
+              </Fragment>
             ))}
+            </View>
           </>
         )}
 
-        {/* Pricing Summary — combined TOTAL / DISCOUNT + Grand Total box */}
+        {/* Pricing Summary — list price / discount (/ net + VAT) + highlighted total box.
+            All prices above are net; VAT is only added here when vat_included. */}
         <View style={s.pricingWrap} wrap={false}>
           <View style={s.pricingSummary}>
             <View style={s.pSumRow}>
@@ -973,61 +1070,59 @@ export function PDFDetailedTemplate({
                 <Text style={s.pSumDiscVal}>-{formatPrice(totalDiscountAmount)}</Text>
               </View>
             )}
+            {quote.vat_included && (
+              <>
+                <View style={s.pSumDivider} />
+                <View style={s.pSumRow}>
+                  <Text style={s.pSumNetLbl}>{labels.totalExclVat}</Text>
+                  <Text style={s.pSumNetVal}>{formatPrice(grandTotal)}</Text>
+                </View>
+                <View style={s.pSumRow}>
+                  <Text style={s.pSumVatLbl}>{labels.vat} ({vatPct}%)</Text>
+                  <Text style={s.pSumVatVal}>{formatPrice(vatAmount)}</Text>
+                </View>
+              </>
+            )}
           </View>
 
-          {/* Grand Total */}
           <View style={s.pricingColTotal}>
-            <Text style={s.pTotalLbl}>{labels.grandTotal}</Text>
-            <Text style={s.pTotalVal}>{formatPrice(grandTotal)}</Text>
-            {quote.vat_included ? (() => {
-              const vatPct = Number(quote.vat_percentage ?? 25)
-              const vatAmount = grandTotal * (vatPct / 100)
-              const totalWithVat = grandTotal + vatAmount
-              return (
-                <>
-                  <Text style={{ fontSize: 7, color: GOLD, marginTop: 4, fontWeight: 700 }}>
-                    {lang === 'hr' ? 'PDV' : 'VAT'} ({vatPct}%): {formatPrice(vatAmount)}
-                  </Text>
-                  <Text style={{ fontFamily: 'Playfair Display', fontSize: 12, fontWeight: 700, color: '#ffffff', marginTop: 2 }}>
-                    {formatPrice(totalWithVat)}
-                  </Text>
-                  <Text style={{ fontSize: 6, color: GOLD, marginTop: 1, fontWeight: 700 }}>
-                    {labels.inclVat}
-                  </Text>
-                </>
-              )
-            })() : (
-              <Text style={{ fontSize: 6, color: GOLD, marginTop: 3, fontWeight: 700 }}>
-                {labels.exclVat}
-              </Text>
-            )}
+            <Text style={s.pTotalLbl}>
+              {quote.vat_included ? labels.totalInclVat : labels.totalExclVat}
+            </Text>
+            <Text style={s.pTotalVal}>
+              {formatPrice(quote.vat_included ? totalWithVat : grandTotal)}
+            </Text>
           </View>
         </View>
 
-        {/* TBQ note (after pricing summary, before notes) */}
-        {quote.items.some((i) => i.is_price_on_request) && (
-          <Text style={{ fontSize: 7, color: '#92400e', fontStyle: 'italic', marginTop: 4, paddingHorizontal: 6 }}>
-            * {labels.tbqNote}
-          </Text>
+        {/* Notes under the totals: VAT notice (net quotes) and TBQ disclaimer.
+            No italic — only the regular font face is registered, italic throws. */}
+        {(!quote.vat_included || hasTbq) && (
+          <View style={s.totalsNotes}>
+            {!quote.vat_included && <Text style={s.smallNote}>{labels.vatChargedNote}</Text>}
+            {hasTbq && <Text style={s.tbqNote}>* {labels.tbqNote}</Text>}
+          </View>
         )}
 
         {/* Notes */}
         {quote.notes && (
           <>
-            <View style={s.secRow}>
-              <Text style={s.secText}>{labels.quoteDetails}</Text>
-              <View style={s.secLine} />
-            </View>
+            {renderSecRow(labels.quoteDetails)}
             <Text style={s.noteText}>{quote.notes}</Text>
+          </>
+        )}
+
+        {/* Delivery Terms */}
+        {deliveryTermsText && (
+          <>
+            {renderSecRow(labels.deliveryTerms)}
+            <Text style={s.noteText}>{deliveryTermsText}</Text>
           </>
         )}
 
         {/* Payment + Terms (keep together) */}
         <View wrap={false}>
-          <View style={s.secRow}>
-            <Text style={s.secText}>{labels.paymentDetails}</Text>
-            <View style={s.secLine} />
-          </View>
+          {renderSecRow(labels.paymentDetails)}
           <View style={s.paySection}>
             <View style={s.payLeft}>
               <View style={s.payBlock}>
@@ -1086,7 +1181,7 @@ export function PDFDetailedTemplate({
               <Text style={s.sigName}>{settings.name ?? 'Navis Marine d.o.o.'}</Text>
             </View>
           </View>
-
+          <Text style={s.footnote}>{labels.notAnInvoice}</Text>
         </View>
       </Page>
     </Document>
