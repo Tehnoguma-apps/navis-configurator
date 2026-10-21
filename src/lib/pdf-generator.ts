@@ -23,6 +23,9 @@ function registerFonts(): void {
     ],
   })
 
+  // Wrap whole words only; the default hyphenation splits item names ("Is-land", "posi-tion").
+  Font.registerHyphenationCallback((word) => [word])
+
   fontsRegistered = true
 }
 
