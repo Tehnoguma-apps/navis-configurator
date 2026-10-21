@@ -479,6 +479,7 @@
     "includeVAT": "Uključi PDV u cijenu",
     "vatPercentage": "PDV %",
     "vatAmount": "PDV",
+    "totalExclVat": "Ukupno bez PDV-a",
     "grandTotalWithVAT": "UKUPNO s PDV-om",
     "quoteOptions": "Opcije ponude",
     "deliveryTermsSaved": "Uvjeti isporuke spremljeni",

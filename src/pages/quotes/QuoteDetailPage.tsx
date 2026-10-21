@@ -26,6 +26,7 @@ import {
 import { cn } from '@/lib/utils'
 import { ds } from '@/lib/styles'
 import { formatPrice, formatDate } from '@/lib/formatters'
+import { calculateVat } from '@/lib/pricing'
 import { useAuth } from '@/hooks/useAuth'
 import {
   useQuote, useCopyQuote, useUpdateQuoteStatus, useUpdateQuoteDeposit, useUpdateQuoteLanguage,
@@ -463,7 +464,7 @@ export default function QuoteDetailPage() {
             <div className="border-t border-gold/30 pt-2">
               <div className="flex items-baseline justify-between">
                 <span className="font-display text-sm font-semibold text-navy">
-                  {t('quotes.grandTotal')}
+                  {t('quotes.totalExclVat')}
                 </span>
                 <span className="font-display text-xl font-bold text-gold">
                   {formatPrice(Number(quote.total_price ?? 0))}
@@ -484,7 +485,7 @@ export default function QuoteDetailPage() {
                       {t('quotes.vatAmount')} ({Number(quote.vat_percentage ?? 25)}%)
                     </span>
                     <span className="font-medium">
-                      {formatPrice(Number(quote.total_price ?? 0) * Number(quote.vat_percentage ?? 25) / 100)}
+                      {formatPrice(calculateVat(Number(quote.total_price ?? 0), Number(quote.vat_percentage ?? 25)).vatAmount)}
                     </span>
                   </div>
                   <div className="flex items-baseline justify-between">
@@ -492,7 +493,7 @@ export default function QuoteDetailPage() {
                       {t('quotes.grandTotalWithVAT')}
                     </span>
                     <span className="font-display text-lg font-bold text-navy">
-                      {formatPrice(Number(quote.total_price ?? 0) * (1 + Number(quote.vat_percentage ?? 25) / 100))}
+                      {formatPrice(calculateVat(Number(quote.total_price ?? 0), Number(quote.vat_percentage ?? 25)).totalWithVat)}
                     </span>
                   </div>
                 </div>
