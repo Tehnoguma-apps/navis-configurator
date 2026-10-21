@@ -243,8 +243,8 @@
   },
   "catalog": {
     "productType": "Vrsta proizvoda",
-    "types": { "yacht": "Jahte", "tender": "Tenderi", "toy": "Igračke" },
-    "typeSingular": { "yacht": "Jahta", "tender": "Tender", "toy": "Igračka" },
+    "types": { "yacht": "Jahte", "tender": "Tenderi", "toy": "Vodene igračke" },
+    "typeSingular": { "yacht": "Jahta", "tender": "Tender", "toy": "Vodena igračka" },
     "categories": {
       "new": "Novi",
       "used": "Rabljeni",
@@ -255,9 +255,9 @@
       "new_tender": "Novi tenderi",
       "used_tender": "Rabljeni tenderi",
       "stock_tender": "Tenderi na zalihi",
-      "new_toy": "Nove igračke",
-      "used_toy": "Rabljene igračke",
-      "stock_toy": "Igračke na zalihi"
+      "new_toy": "Nove vodene igračke",
+      "used_toy": "Rabljene vodene igračke",
+      "stock_toy": "Vodene igračke na zalihi"
     },
     "categoryHints": { "new": "Tvornička narudžba", "used": "Polovni", "stock": "Odmah dostupno" },
     "searchPlaceholder": "Pretraži marke i modele",

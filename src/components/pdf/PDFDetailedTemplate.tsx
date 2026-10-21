@@ -765,7 +765,12 @@ export function PDFDetailedTemplate({
     if (!hasPerItem) {
       const boatPct = levelPct('boat_base')
       const equipPct = levelPct('equipment_all')
-      const boatWord = lang === 'hr' ? 'brod' : 'boat'
+      const productWords = {
+        yacht: lang === 'hr' ? 'brod' : 'boat',
+        tender: 'tender',
+        toy: lang === 'hr' ? 'igračka' : 'toy',
+      }
+      const boatWord = productWords[(quote.boat?.product_type ?? 'yacht') as keyof typeof productWords] ?? productWords.yacht
       const equipWord = lang === 'hr' ? 'oprema' : 'equipment'
       const parts: string[] = []
       if (boatPct != null) parts.push(`${boatWord} ${boatPct}%`)

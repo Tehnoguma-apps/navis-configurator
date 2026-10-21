@@ -243,8 +243,8 @@
   },
   "catalog": {
     "productType": "Product type",
-    "types": { "yacht": "Yachts", "tender": "Tenders", "toy": "Toys" },
-    "typeSingular": { "yacht": "Yacht", "tender": "Tender", "toy": "Toy" },
+    "types": { "yacht": "Yachts", "tender": "Tenders", "toy": "Water toys" },
+    "typeSingular": { "yacht": "Yacht", "tender": "Tender", "toy": "Water toy" },
     "categories": {
       "new": "New",
       "used": "Used",
@@ -255,9 +255,9 @@
       "new_tender": "New tenders",
       "used_tender": "Used tenders",
       "stock_tender": "Stock tenders",
-      "new_toy": "New toys",
-      "used_toy": "Used toys",
-      "stock_toy": "Stock toys"
+      "new_toy": "New water toys",
+      "used_toy": "Used water toys",
+      "stock_toy": "Water toys in stock"
     },
     "categoryHints": { "new": "Factory order", "used": "Pre-owned", "stock": "Available now" },
     "searchPlaceholder": "Search brands and models",
