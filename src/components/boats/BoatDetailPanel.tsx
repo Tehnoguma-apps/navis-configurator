@@ -23,6 +23,7 @@ import { BoatForm } from '@/components/boats/BoatForm'
 import { BoatEquipmentTab } from '@/components/boats/BoatEquipmentTab'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { CategoryBadge } from '@/components/catalog/CategoryBadge'
+import { ProductOptionGroups } from '@/components/catalog/ProductOptionGroups'
 import { getBoatCategory, getProductType } from '@/lib/catalog'
 import type { BoatSpec } from '@/types'
 import type { BoatFormData } from '@/lib/validators'
@@ -85,7 +86,7 @@ export const BoatDetailPanel = ({
   const handleCreate = (data: BoatFormData) => {
     createBoat.mutate(data, {
       onSuccess: (newBoat) => {
-        toast.success(t('boats.createSuccess'))
+        toast.success(t('boats.createSuccess', { context: data.product_type }))
         onBoatCreated(newBoat.id)
       },
       onError: () => toast.error(t('boats.createError')),
@@ -119,7 +120,7 @@ export const BoatDetailPanel = ({
   if (mode === 'create') {
     return (
       <div className="flex h-full flex-col">
-        <PanelHeader title={t('boats.addBoat')} onClose={onClose} />
+        <PanelHeader title={t('boats.addBoat', { context: createDefaults?.product_type })} onClose={onClose} />
         <div className="flex-1 overflow-y-auto p-4">
           <BoatForm
             defaultValues={createDefaults}
@@ -159,7 +160,7 @@ export const BoatDetailPanel = ({
   if (mode === 'edit') {
     return (
       <div className="flex h-full flex-col">
-        <PanelHeader title={t('boats.editBoat')} onClose={() => onModeChange('view')} />
+        <PanelHeader title={t('boats.editBoat', { context: getProductType(boat) })} onClose={() => onModeChange('view')} />
         <div className="flex-1 overflow-y-auto p-4">
           <BoatForm
             defaultValues={{
@@ -330,8 +331,8 @@ export const BoatDetailPanel = ({
       {/* Delete confirmation */}
       <ConfirmDialog
         isOpen={showDeleteConfirm}
-        title={t('boats.deleteTitle')}
-        description={t('boats.deleteConfirm')}
+        title={t('boats.deleteTitle', { context: getProductType(boat) })}
+        description={t('boats.deleteConfirm', { context: getProductType(boat) })}
         confirmText={t('common.delete')}
         cancelText={t('common.cancel')}
         isDangerous
@@ -513,9 +514,10 @@ function SpecificationsTab({
             className="h-8 w-full appearance-none rounded-md border border-border bg-white px-2 pr-7 text-xs font-medium text-foreground transition-colors hover:bg-muted cursor-pointer"
           >
             <option value="" disabled>{t('boats.copySpecsFrom')}</option>
-            {otherBoats.map((b) => (
-              <option key={b.id} value={b.id}>{b.name}</option>
-            ))}
+            <ProductOptionGroups
+              boats={otherBoats}
+              preferredType={getProductType((allBoats ?? []).find((b) => b.id === boatId))}
+            />
           </select>
           <Copy className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
         </div>

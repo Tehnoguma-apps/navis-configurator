@@ -62,7 +62,7 @@ export default function ClientStep() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl space-y-3">
+    <div className="space-y-3">
       {/* Label */}
       <p className="text-xs text-muted-foreground">
         {t('configurator.selectExistingOrNew')}
@@ -89,15 +89,17 @@ export default function ClientStep() {
             </div>
           </div>
 
-          <ClientForm
-            defaultValues={clientData}
-            selectedCompany={selectedCompany}
-            selectedContact={selectedContact}
-            onSelectContact={handleSelectContact}
-            onSubmit={handleFormSubmit}
-            onValuesChange={setClientData}
-            formRef={formRef}
-          />
+          <div className="mx-auto max-w-3xl">
+            <ClientForm
+              defaultValues={clientData}
+              selectedCompany={selectedCompany}
+              selectedContact={selectedContact}
+              onSelectContact={handleSelectContact}
+              onSubmit={handleFormSubmit}
+              onValuesChange={setClientData}
+              formRef={formRef}
+            />
+          </div>
         </>
       )}
 

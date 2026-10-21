@@ -14,7 +14,7 @@ export function useCompanies(filters?: CompanyFilters) {
     queryFn: async () => {
       let query = supabase
         .from('companies')
-        .select('id, name, client_type, email, phone, client_category, city, country, created_at, status, contacts(id, full_name, email, phone, position, is_primary), quotes:quotes(count)')
+        .select('id, name, client_type, email, phone, client_category, city, country, preferred_language, created_at, status, contacts(id, full_name, email, phone, position, is_primary), quotes:quotes(count)')
         .eq('status', 'active')
         .order('name')
 

@@ -188,7 +188,7 @@ export default function BoatsListPage() {
                 className={cn(ds.btn.base, ds.btn.md, ds.btn.primary, 'h-11 flex-1 sm:h-9 sm:flex-none')}
               >
                 <Plus className="h-4 w-4" />
-                {t('boats.addBoat')}
+                {t('boats.addBoat', { context: productType })}
               </button>
             </>
           )}
