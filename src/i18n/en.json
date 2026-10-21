@@ -274,7 +274,7 @@
     "selectExistingOrNew": "Search for an existing client or enter new details",
     "newClient": "New Client",
     "noClientsFound": "No clients found",
-    "showingNofTotal": "Showing {{shown}} of {{total}} results — refine your search",
+    "clientsCount": "{{shown}} of {{total}} clients",
     "contactName": "Contact Name",
     "companyName": "Company Name",
     "email": "Email",

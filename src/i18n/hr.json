@@ -274,7 +274,7 @@
     "selectExistingOrNew": "Pretražite postojećeg klijenta ili unesite nove podatke",
     "newClient": "Novi klijent",
     "noClientsFound": "Nema pronađenih klijenata",
-    "showingNofTotal": "Prikazano {{shown}} od {{total}} rezultata — suzite pretragu",
+    "clientsCount": "{{shown}} od {{total}} klijenata",
     "contactName": "Ime i prezime",
     "companyName": "Naziv tvrtke",
     "email": "E-mail",
