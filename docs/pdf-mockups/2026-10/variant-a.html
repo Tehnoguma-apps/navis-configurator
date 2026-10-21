@@ -8,94 +8,84 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  :root { --navy: #1a1a2e; --gold: #c9a961; --gold-soft: #e9dfc8; --ink: #2a2a2a; --muted: #6b6f7b; --rule: #ebe8e1; --tint: #faf8f4; }
-  .flow { color: var(--ink); font-size: 7.6pt; line-height: 1.45; font-variant-numeric: tabular-nums lining-nums; }
-  .serif { font-family: 'Playfair Display', Georgia, serif; }
-  .lbl { font-size: 6.6pt; color: #9a7f45; letter-spacing: .02em; margin-bottom: 1.5pt; }
+  :root { --navy: #1a1a2e; --gold: #c9a961; --gold-soft: #e7dcc3; --gold-ink: #8d7240; --ink: #2a2a2a; --muted: #6b6f7b; --rule: #ece9e2; }
+  .flow { color: var(--ink); font-size: 7.5pt; line-height: 1.38; font-variant-numeric: tabular-nums lining-nums; }
+  .num { font-variant-numeric: tabular-nums lining-nums; white-space: nowrap; }
+  .lbl { font-size: 6.5pt; color: var(--gold-ink); margin-bottom: 1pt; }
 
-  /* Parties */
-  .parties { display: grid; grid-template-columns: 1fr 1fr; gap: 0 24pt; margin: 2pt 0 14pt; }
-  .parties .who { font-family: 'Playfair Display', serif; font-size: 11pt; color: var(--navy); }
-  .parties .sub { color: var(--muted); font-size: 7pt; }
+  /* Parties + boat */
+  .parties { display: grid; grid-template-columns: 1fr 1fr; gap: 0 24pt; margin-bottom: 9pt; }
+  .parties .who { font-family: 'Playfair Display', serif; font-size: 10.5pt; color: var(--navy); line-height: 1.2; }
+  .boat-title { display: flex; justify-content: space-between; align-items: flex-end; gap: 16pt; padding-bottom: 6pt; border-bottom: .75pt solid var(--gold); }
+  .boat-title h1 { font-family: 'Playfair Display', serif; font-weight: 500; font-size: 22pt; line-height: 1.05; color: var(--navy); letter-spacing: -.01em; }
+  .boat-title .hull { font-family: 'Playfair Display', serif; font-style: italic; font-size: 9pt; color: var(--muted); margin-top: 2pt; }
+  .boat-title .price { text-align: right; }
+  .boat-title .price .v { font-family: 'Playfair Display', serif; font-size: 16pt; color: var(--navy); line-height: 1.1; }
+  .boat-title .price .l { font-size: 6.5pt; color: var(--muted); }
 
-  /* Boat */
-  .boat-title { display: flex; justify-content: space-between; align-items: flex-end; gap: 16pt; padding-bottom: 8pt; border-bottom: .75pt solid var(--gold); }
-  .boat-title h1 { font-family: 'Playfair Display', serif; font-weight: 500; font-size: 26pt; line-height: 1.05; color: var(--navy); letter-spacing: -.01em; }
-  .boat-title .hull { font-family: 'Playfair Display', serif; font-style: italic; font-size: 10pt; color: var(--muted); margin-top: 3pt; }
-  .boat-title .price { text-align: right; white-space: nowrap; }
-  .boat-title .price .v { font-family: 'Playfair Display', serif; font-size: 18pt; color: var(--navy); line-height: 1.1; }
-  .boat-title .price .l { font-size: 6.6pt; color: var(--muted); }
-  .hero { height: 40mm; margin: 10pt 0 0; background:
-      linear-gradient(180deg, rgba(26,26,46,0) 40%, rgba(26,26,46,.55)),
-      linear-gradient(115deg, #cfd9e3 0%, #9fb4c8 45%, #5d7894 100%);
-    position: relative; }
-  .hero::after { content: 'Hero image – Azimut 70 Flybridge (from boat gallery)'; position: absolute; left: 10pt; bottom: 8pt; color: rgba(255,255,255,.85); font-size: 6.6pt; }
-  .hero::before { content: ''; position: absolute; left: 0; right: 0; bottom: 30%; height: .75pt; background: rgba(255,255,255,.5); }
-  .specs { display: grid; grid-template-columns: repeat(4, 1fr); border-bottom: .5pt solid var(--rule); margin-bottom: 4pt; }
-  .specs div { padding: 5pt 8pt 5pt 0; border-top: .5pt solid var(--rule); }
-  .specs div:nth-child(-n+4) { border-top: 0; }
-  .specs dt { font-size: 6.3pt; color: var(--muted); }
-  .specs dd { font-size: 7.6pt; color: var(--navy); font-weight: 500; }
+  /* Specs: three ruled columns of label / value pairs */
+  .specs { display: grid; grid-template-columns: repeat(3, 1fr); column-gap: 18pt; margin-top: 3pt; }
+  .specs div { display: flex; justify-content: space-between; gap: 8pt; padding: 2pt 0; border-bottom: .4pt solid var(--rule); }
+  .specs dt { color: var(--muted); font-size: 6.8pt; }
+  .specs dd { color: var(--navy); font-weight: 500; text-align: right; }
 
   /* Section title */
-  .sec { display: flex; align-items: baseline; gap: 10pt; margin: 14pt 0 5pt; }
-  .sec h2 { font-family: 'Playfair Display', serif; font-weight: 500; font-size: 14pt; color: var(--navy); white-space: nowrap; }
+  .sec { display: flex; align-items: baseline; gap: 10pt; margin: 12pt 0 4pt; }
+  .sec h2 { font-family: 'Playfair Display', serif; font-weight: 500; font-size: 12.5pt; color: var(--navy); white-space: nowrap; }
   .sec .rule { flex: 1; height: .5pt; background: var(--gold); transform: translateY(-3pt); }
-  .sec .aside { font-size: 6.8pt; color: var(--muted); white-space: nowrap; }
+  .sec .aside { font-size: 6.6pt; color: var(--muted); white-space: nowrap; }
+
+  /* Standard equipment: four-column list grouped by area */
+  .std { columns: 4; column-gap: 14pt; }
+  .std section { break-inside: avoid; margin-bottom: 5pt; }
+  .std h3 { font-family: 'Playfair Display', serif; font-style: italic; font-weight: 400; font-size: 8.4pt; color: var(--navy); border-bottom: .5pt solid var(--gold-soft); padding-bottom: 1pt; margin-bottom: 1.5pt; }
+  .std li { list-style: none; font-size: 6.7pt; line-height: 1.36; padding-left: 6pt; position: relative; color: #3a3a3a; }
+  .std li::before { content: ''; position: absolute; left: 0; top: .62em; width: 2.6pt; height: .5pt; background: var(--gold); }
 
   /* Optional table */
-  .row { display: grid; grid-template-columns: 1fr 22pt 56pt 44pt 60pt; column-gap: 8pt; align-items: baseline; padding: 2.2pt 0; border-bottom: .4pt solid var(--rule); }
+  .row { display: grid; grid-template-columns: 1fr 20pt 52pt 40pt 56pt; column-gap: 8pt; align-items: baseline; padding: 1.7pt 0; box-shadow: inset 0 -.4pt 0 var(--rule); }
   .row > :nth-child(n+2) { text-align: right; }
   .row .d { color: #b3b6bd; }
-  .thead { border-bottom: .75pt solid var(--navy); padding: 0 0 3pt; font-size: 6.4pt; color: var(--muted); }
-  .cat { display: flex; justify-content: space-between; align-items: baseline; padding: 7pt 0 2.5pt; border-bottom: .75pt solid var(--gold-soft); }
-  .cat .n { font-family: 'Playfair Display', serif; font-style: italic; font-size: 10pt; color: var(--navy); }
-  .cat .s { font-size: 6.8pt; color: var(--muted); }
+  .thead { box-shadow: none; border-bottom: .75pt solid var(--navy); padding: 0 0 2pt; font-size: 6.3pt; color: var(--muted); }
+  .cat { display: flex; justify-content: space-between; align-items: baseline; padding: 5pt 0 1.5pt; border-bottom: .75pt solid var(--gold-soft); }
+  .cat .n { font-family: 'Playfair Display', serif; font-style: italic; font-size: 9.2pt; color: var(--navy); }
+  .cat .s { font-size: 6.6pt; color: var(--muted); }
   .cat .s b { color: var(--navy); font-weight: 600; margin-left: 6pt; }
-  .eqsum { display: flex; justify-content: flex-end; gap: 14pt; padding: 6pt 0 0; font-size: 7.6pt; color: var(--navy); }
+  .eqsum { display: flex; justify-content: flex-end; gap: 14pt; padding: 4pt 0 0; color: var(--navy); }
   .eqsum b { font-weight: 600; }
 
-  /* Totals */
-  .totals { display: grid; grid-template-columns: 1fr 78mm; gap: 20pt; margin-top: 4pt; }
-  .totals .note { font-size: 7pt; color: var(--muted); line-height: 1.55; padding-top: 2pt; }
-  .totals .note p + p { margin-top: 5pt; }
-  .stmt .l { display: flex; justify-content: space-between; padding: 3.2pt 0; border-bottom: .4pt solid var(--rule); }
-  .stmt .l.sub { color: var(--muted); font-size: 6.8pt; padding: 1.6pt 0 1.6pt 8pt; border-bottom: 0; }
+  /* Totals with offer details beside them */
+  .totals { display: grid; grid-template-columns: 1fr 80mm; gap: 22pt; }
+  .details .trade { font-family: 'Playfair Display', serif; font-style: italic; font-size: 9.5pt; color: var(--navy); line-height: 1.4; border-left: .75pt solid var(--gold); padding: 1pt 0 1pt 9pt; margin: 2pt 0 8pt; }
+  .details p.note { font-size: 6.8pt; color: var(--muted); line-height: 1.5; }
+  .details p.note + p.note { margin-top: 3pt; }
+  .stmt .l { display: flex; justify-content: space-between; padding: 2.3pt 0; border-bottom: .4pt solid var(--rule); }
+  .stmt .l.sub { color: var(--muted); font-size: 6.6pt; padding: 1pt 0 1pt 8pt; border-bottom: 0; }
   .stmt .l.disc span:last-child { color: #8a3b2b; }
-  .stmt .l.net { font-weight: 600; color: var(--navy); border-top: .75pt solid var(--navy); border-bottom: 0; margin-top: 2pt; }
-  .stmt .grand { margin-top: 8pt; padding: 8pt 0 7pt; border-top: .75pt solid var(--gold); border-bottom: 2.4pt double var(--gold); display: flex; justify-content: space-between; align-items: baseline; }
+  .stmt .l.net { font-weight: 600; color: var(--navy); border-top: .75pt solid var(--navy); margin-top: 1.5pt; }
+  .stmt .grand { margin-top: 5pt; padding: 5pt 0 4pt; border-top: .75pt solid var(--gold); border-bottom: 2.4pt double var(--gold); display: flex; justify-content: space-between; align-items: baseline; }
   .stmt .grand .k { font-size: 7.4pt; color: var(--navy); font-weight: 600; }
-  .stmt .grand .v { font-family: 'Playfair Display', serif; font-size: 20pt; color: var(--navy); }
-  .stmt .exvat { text-align: right; font-size: 6.6pt; color: var(--muted); margin-top: 4pt; }
-
-  /* Standard equipment */
-  .std { columns: 3; column-gap: 18pt; }
-  .std section { break-inside: avoid; margin-bottom: 9pt; }
-  .std h3 { font-family: 'Playfair Display', serif; font-style: italic; font-weight: 400; font-size: 9pt; color: var(--navy); border-bottom: .5pt solid var(--gold-soft); padding-bottom: 2pt; margin-bottom: 3pt; }
-  .std li { list-style: none; font-size: 6.9pt; line-height: 1.5; padding-left: 7pt; position: relative; }
-  .std li::before { content: ''; position: absolute; left: 0; top: .62em; width: 3pt; height: .5pt; background: var(--gold); }
+  .stmt .grand .v { font-family: 'Playfair Display', serif; font-size: 17pt; color: var(--navy); }
 
   /* Payment */
-  .pay { display: grid; grid-template-columns: 1.75fr 1fr 1.2fr 70pt; gap: 16pt; align-items: start; }
-  .pay .plan div { display: grid; grid-template-columns: 1fr auto 52pt; gap: 6pt; padding: 2.4pt 0; border-bottom: .4pt solid var(--rule); }
-  .pay .plan div span:first-child { color: var(--muted); }
-  .pay .plan div span:nth-child(2) { color: var(--muted); text-align: right; }
-  .pay .plan div b { text-align: right; }
-  .pay .plan b { color: var(--navy); font-weight: 600; white-space: nowrap; }
-  .pay .plan i { font-style: normal; color: var(--muted); margin-right: 6pt; }
-  .pay p { line-height: 1.55; }
-  .pay .qr { text-align: center; font-size: 6.2pt; color: var(--muted); }
-  .pay .qr svg { display: block; margin: 0 auto 3pt; }
+  .pay { display: grid; grid-template-columns: 2fr 1fr 1.2fr 62pt; gap: 14pt; align-items: start; }
+  .plan div { display: grid; grid-template-columns: 1fr 22pt 56pt; gap: 6pt; padding: 1.8pt 0; border-bottom: .4pt solid var(--rule); }
+  .plan div span:first-child { color: var(--muted); }
+  .plan div span:nth-child(2) { color: var(--muted); text-align: right; }
+  .plan div b { text-align: right; color: var(--navy); font-weight: 600; }
+  .pay p { line-height: 1.5; }
+  .pay .qr { text-align: center; font-size: 6pt; color: var(--muted); line-height: 1.3; }
+  .pay .qr svg { display: block; margin: 0 auto 2pt; }
 
-  .terms { display: grid; grid-template-columns: 1fr 1fr; gap: 20pt; }
-  .terms li { list-style: none; padding: 2.4pt 0; border-bottom: .4pt solid var(--rule); }
-  .terms .trade { font-family: 'Playfair Display', serif; font-style: italic; font-size: 9.5pt; color: var(--navy); line-height: 1.4; border-left: .75pt solid var(--gold); padding-left: 10pt; }
+  .terms ul { display: flex; gap: 0; }
+  .terms li { list-style: none; padding: 0 14pt; border-left: .5pt solid var(--gold); }
+  .terms li:first-child { padding-left: 0; border-left: 0; }
 
-  .sign { display: grid; grid-template-columns: 1fr 1fr; gap: 36pt; margin-top: 22pt; }
-  .sign .line { height: 30pt; border-bottom: .6pt solid var(--navy); }
-  .sign .cap { display: flex; justify-content: space-between; font-size: 6.8pt; color: var(--muted); margin-top: 3pt; }
+  .sign { display: grid; grid-template-columns: 1fr 1fr; gap: 36pt; margin-top: 16pt; }
+  .sign .line { height: 26pt; border-bottom: .6pt solid var(--navy); }
+  .sign .cap { display: flex; justify-content: space-between; font-size: 6.6pt; color: var(--muted); margin-top: 3pt; }
   .sign .cap b { color: var(--navy); font-weight: 600; }
-  .foot-note { margin-top: 14pt; text-align: center; font-family: 'Playfair Display', serif; font-style: italic; font-size: 8pt; color: var(--muted); }
+  .foot-note { margin-top: 12pt; text-align: center; font-family: 'Playfair Display', serif; font-style: italic; font-size: 8pt; color: var(--muted); }
 </style>
 </head>
 <body>
@@ -107,59 +97,61 @@
   const add = (html, o) => B.push(Object.assign({ el: h(html) }, o || {}));
   const sec = (t, aside) => `<div class="sec"><h2>${t}</h2><span class="rule"></span>${aside ? `<span class="aside">${aside}</span>` : ''}</div>`;
   const thead = `<div class="row thead"><span>Item</span><span>Qty</span><span>Price</span><span>Discount</span><span>Net</span></div>`;
+  const contHead = (cat) => () => h(`<div>${sec('Optional equipment', 'continued')}${thead}${cat ? `<div class="cat"><span class="n">${cat}, continued</span><span class="s"></span></div>` : ''}</div>`);
 
   add(`<div class="parties">
     <div><div class="lbl">Customer</div><div class="who">${q.customer.name}</div></div>
-    <div><div class="lbl">Offer made by</div><div class="who">${q.offerMadeBy.name}</div><div class="sub">${q.offerMadeBy.email}</div></div>
+    <div><div class="lbl">Offer made by</div><div class="who">${q.offerMadeBy.name}</div></div>
   </div>`);
+  const specs = q.boat.key.concat(q.boat.specs.filter((s) => s[0] !== 'Engines' && s[0] !== 'Design'));
   add(`<div><div class="boat-title">
-      <div><h1>${q.boat.name}</h1><div class="hull">Hull no. ${q.boat.hull}, built by ${q.boat.builder}</div></div>
-      <div class="price"><div class="l">Base price excl. VAT</div><div class="v">${eur(q.boat.basePrice)}</div></div>
-    </div><div class="hero"></div></div>`);
-  const specs = q.boat.key.concat(q.boat.specs).filter((s) => s[0] !== 'Shipyard' && s[0] !== 'Engines');
-  add(`<dl class="specs">${specs.map((s) => `<div><dt>${s[0]}</dt><dd>${s[1]}</dd></div>`).join('')}</dl>`);
+      <div><h1>${q.boat.name}</h1><div class="hull">Hull no. ${q.boat.hull}, design by Alberto Mancini and Achille Salvagni</div></div>
+      <div class="price"><div class="l">Base price excl. VAT</div><div class="v num">${eur(q.boat.basePrice)}</div></div>
+    </div>
+    <dl class="specs">${specs.map((s) => `<div><dt>${s[0]}</dt><dd>${s[1]}</dd></div>`).join('')}</dl></div>`);
+
+  add(sec('Standard equipment', 'included in the base price'), { keep: true });
+  add(`<div class="std">${q.standard.map((g) => `<section><h3>${g[0]}</h3><ul>${g[1].map((i) => `<li>${i}</li>`).join('')}</ul></section>`).join('')}</div>`);
 
   add(sec('Optional equipment', `${q.itemCount} items selected`), { keep: true });
   add(thead, { keep: true });
   q.optional.forEach((c) => {
-    add(`<div class="cat"><span class="n">${c[0]}</span><span class="s">${c[1].length} ${c[1].length === 1 ? 'item' : 'items'}<b>${eur(c.subtotal)}</b></span></div>`, { keep: true });
+    add(`<div class="cat"><span class="n">${c[0]}</span><span class="s">${c[1].length} ${c[1].length === 1 ? 'item' : 'items'}<b class="num">${eur(c.subtotal)}</b></span></div>`, { keep: true, cont: contHead() });
     c[1].forEach((it, i) => add(`<div class="row"><span>${it[0]}</span><span>1</span><span>${eur(it[1])}</span><span class="d">–</span><span>${eur(it[1])}</span></div>`,
-      { keep: (i === 0 && c[1].length > 2) || i === c[1].length - 2, cont: () => h(`<div>${sec('Optional equipment', 'continued')}<div class="cat"><span class="n">${c[0]}, continued</span><span class="s"></span></div></div>`) }));
+      { keep: (i === 0 && c[1].length > 2) || i === c[1].length - 2, cont: contHead(c[0]) }));
   });
   add(`<div class="eqsum"><span>Optional equipment total</span><b>${eur(q.equipmentTotal)}</b></div>`);
 
   add(sec('Price summary'), { keep: true });
   add(`<div class="totals">
-    <div class="note">
-      <p>The boat base price and all optional equipment carry a ${q.discount.boatPct} % dealer discount. Optional items have no individual discounts in this quote.</p>
-      <p>Prices are in euro. VAT is calculated at the Croatian rate of ${q.vatPct} %. For buyers outside the EU VAT regime, the net price applies.</p>
+    <div class="details">
+      <div class="lbl">Offer details</div>
+      <p class="trade">${q.tradeIn}.</p>
+      <p class="note">A ${q.discount.boatPct} % dealer discount applies to the base price and to all optional equipment. Optional items carry no individual discounts.</p>
+      <p class="note">Prices are in euro. VAT is charged at the Croatian rate of ${q.vatPct} %.</p>
     </div>
     <div class="stmt">
       <div class="l"><span>Base price</span><span>${eur(q.boat.basePrice)}</span></div>
       <div class="l"><span>Optional equipment</span><span>${eur(q.equipmentTotal)}</span></div>
-      <div class="l"><span>Total list price excl. VAT</span><span>${eur(q.listTotal)}</span></div>
-      <div class="l disc"><span>Discount (${q.discount.boatPct} %)</span><span>${eur(-q.discountTotal)}</span></div>
-      <div class="l sub"><span>Boat ${q.discount.boatPct} %</span><span>${eur(-q.boatDiscount)}</span></div>
-      <div class="l sub"><span>Equipment ${q.discount.equipmentPct} %</span><span>${eur(-q.equipmentDiscount)}</span></div>
-      <div class="l net"><span>Net price excl. VAT</span><span>${eur(q.net)}</span></div>
+      <div class="l"><span>Total list price</span><span>${eur(q.listTotal)}</span></div>
+      <div class="l disc"><span>Discount ${q.discount.boatPct} %</span><span>${eur(-q.discountTotal)}</span></div>
+      <div class="l sub"><span>Boat</span><span>${eur(-q.boatDiscount)}</span></div>
+      <div class="l sub"><span>Optional equipment</span><span>${eur(-q.equipmentDiscount)}</span></div>
+      <div class="l net"><span>Total excl. VAT</span><span>${eur(q.net)}</span></div>
       <div class="l"><span>VAT ${q.vatPct} %</span><span>${eur(q.vat)}</span></div>
       <div class="grand"><span class="k">Total incl. VAT</span><span class="v">${eur(q.gross)}</span></div>
-      <div class="exvat">Without VAT: ${eur(q.net)}</div>
     </div></div>`);
-
-  add(sec('Standard equipment', `included in the base price`), { keep: true });
-  add(`<div class="std">${q.standard.map((g) => `<section><h3>${g[0]}</h3><ul>${g[1].map((i) => `<li>${i}</li>`).join('')}</ul></section>`).join('')}</div>`);
 
   add(sec('Payment'), { keep: true });
   add(`<div class="pay">
     <div><div class="lbl">Terms of payment</div><div class="plan">${q.paymentTerms.map((p) => `<div><span>${p[0]}</span><span>${p[1]} %</span><b>${eur(q.gross * p[1] / 100)}</b></div>`).join('')}</div></div>
-    <div><div class="lbl">Recipient</div><p>${q.seller.name}<br>${q.seller.street}<br>${q.seller.city}<br>OIB: ${q.seller.oib}</p></div>
-    <div><div class="lbl">Bank details</div><p>IBAN: ${q.seller.iban}<br>BIC/SWIFT: ${q.seller.bic}<br>${q.seller.bank}<br>Reference: ${q.number}</p></div>
-    <div class="qr">${Pager.qr('58pt')}Scan to pay advance ${q.depositPct}&nbsp;%<br>${eur(q.deposit)}</div>
+    <div><div class="lbl">Recipient</div><p>${q.seller.name}<br>${q.seller.street}<br>${q.seller.city}<br>OIB ${q.seller.oib}</p></div>
+    <div><div class="lbl">Payment details</div><p>IBAN ${q.seller.iban}<br>BIC/SWIFT ${q.seller.bic}<br>${q.seller.bank}<br>Reference ${q.number}</p></div>
+    <div class="qr">${Pager.qr('56pt')}Scan to pay the ${q.depositPct}&nbsp;% advance<br><b class="num">${eur(q.deposit)}</b></div>
   </div>`);
 
   add(sec('Terms of delivery'), { keep: true });
-  add(`<div class="terms"><ul>${q.deliveryTerms.map((t) => `<li>${t}</li>`).join('')}</ul><p class="trade">${q.tradeIn}</p></div>`, { keep: true });
+  add(`<div class="terms"><ul>${q.deliveryTerms.map((t) => `<li>${t}</li>`).join('')}</ul></div>`, { keep: true });
   add(`<div><div class="sign">
     <div><div class="line"></div><div class="cap"><span>Signature for buyer</span><b>${q.customer.name}</b></div></div>
     <div><div class="line"></div><div class="cap"><span>Signature for seller</span><b>${q.seller.name}</b></div></div>

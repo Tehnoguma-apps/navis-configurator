@@ -1,11 +1,12 @@
 /* Data for quote NM-2026-143 (real optional equipment, prices and totals).
- * Standard equipment, specs, payment terms are realistic placeholders for the mockup. */
+ * Standard equipment, specs and payment plan are realistic placeholders for the mockup;
+ * contact details appear only where quote 143 carries them. */
 window.QUOTE = {
   number: 'NM-2026-143',
   date: '8 Oct 2026',
   validUntil: '7 Nov 2026',
   customer: { name: 'Doron Dymschiz', email: null },
-  offerMadeBy: { name: 'Romano Moric', email: 'romano.moric@navis-marine.hr', phone: '+385 91 000 0000' },
+  offerMadeBy: { name: 'Romano Moric' },
   boat: {
     name: 'Azimut 70 Flybridge',
     hull: '201',

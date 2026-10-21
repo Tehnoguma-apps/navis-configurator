@@ -67,17 +67,22 @@
     </footer>`);
   }
 
-  /* Deterministic QR-like placeholder (not scannable) */
+  /* Deterministic QR-like placeholder (version 3 layout: finders, separators, timing,
+   * alignment pattern, quiet zone). Looks like a real code but is not scannable. */
   function qr(size, color) {
     const n = 29; let seed = 143; const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
-    const finder = (x, y) => (x < 7 && y < 7) || (x >= n - 7 && y < 7) || (x < 7 && y >= n - 7);
+    const inFinder = (x, y) => (x < 8 && y < 8) || (x >= n - 8 && y < 8) || (x < 8 && y >= n - 8);
+    const inAlign = (x, y) => x >= 20 && x <= 24 && y >= 20 && y <= 24;
     let r = '';
     for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
-      if (finder(x, y)) continue;
-      if (rnd() > 0.52) r += `<rect x="${x}" y="${y}" width="1" height="1"/>`;
+      if (inFinder(x, y) || inAlign(x, y)) continue;
+      if (x === 6 || y === 6) { if ((x + y) % 2 === 0) r += `<rect x="${x}" y="${y}" width="1" height="1"/>`; continue; }
+      const dense = (x * 7 + y * 13) % 11 < 2 ? 0.35 : 0.5;
+      if (rnd() > dense) r += `<rect x="${x}" y="${y}" width="1" height="1"/>`;
     }
     const f = (x, y) => `<rect x="${x}" y="${y}" width="7" height="7"/><rect x="${x + 1}" y="${y + 1}" width="5" height="5" fill="#fff"/><rect x="${x + 2}" y="${y + 2}" width="3" height="3"/>`;
-    return `<svg viewBox="-1 -1 ${n + 2} ${n + 2}" width="${size}" height="${size}" fill="${color || '#1a1a2e'}" shape-rendering="crispEdges" role="img" aria-label="Payment QR code placeholder"><rect x="-1" y="-1" width="${n + 2}" height="${n + 2}" fill="#fff"/>${f(0, 0)}${f(n - 7, 0)}${f(0, n - 7)}${r}</svg>`;
+    const a = `<rect x="20" y="20" width="5" height="5"/><rect x="21" y="21" width="3" height="3" fill="#fff"/><rect x="22" y="22" width="1" height="1"/>`;
+    return `<svg viewBox="-2 -2 ${n + 4} ${n + 4}" width="${size}" height="${size}" fill="${color || '#1a1a2e'}" shape-rendering="crispEdges" role="img" aria-label="Payment QR code placeholder"><rect x="-2" y="-2" width="${n + 4}" height="${n + 4}" fill="#fff"/>${f(0, 0)}${f(n - 7, 0)}${f(0, n - 7)}${a}<rect x="8" y="${n - 8}" width="1" height="1"/>${r}</svg>`;
   }
 
   async function run(q, blocks, opts) {
@@ -93,7 +98,8 @@
       root.appendChild(sh);
       body = sh.querySelector('.sheet-body'); flow = sh.querySelector('.flow'); placed = [];
     };
-    const over = () => flow.scrollHeight > body.clientHeight + 0.5;
+    /* 6px slack: print snaps hairlines differently than screen, so leave room for drift */
+    const over = () => flow.scrollHeight > body.clientHeight - 6;
     newSheet(true);
     for (const b of blocks) {
       flow.appendChild(b.el);
