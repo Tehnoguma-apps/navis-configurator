@@ -3,6 +3,7 @@ import { supabase } from '@/lib/supabase'
 import { importPayloadSchema, validateImportPayload } from '@/lib/price-import'
 import type { ImportPayload, ImportWarning } from '@/lib/price-import'
 import type { Json } from '@/types/supabase'
+import type { BoatCategory, ProductType } from '@/types'
 
 function fileToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -23,19 +24,30 @@ interface ExtractResult {
   warnings: ImportWarning[]
 }
 
+interface ExtractInput {
+  file: File
+  productType: ProductType
+  category: BoatCategory
+}
+
 export function useExtractPriceList() {
-  return useMutation<ExtractResult, Error, File>({
-    mutationFn: async (file: File) => {
+  return useMutation<ExtractResult, Error, ExtractInput>({
+    mutationFn: async ({ file, productType, category }: ExtractInput) => {
       const pdf_base64 = await fileToBase64(file)
 
       const { data, error } = await supabase.functions.invoke('extract-price-list', {
-        body: { pdf_base64 },
+        body: { pdf_base64, product_type: productType },
       })
 
       if (error) throw new Error(error.message || 'Extraction failed')
       if (data?.error) throw new Error(data.error)
 
-      const parsed = importPayloadSchema.parse(data)
+      const extracted = importPayloadSchema.parse(data)
+      // Category and product type come from the user's choice, not from the AI.
+      const parsed: ImportPayload = {
+        ...extracted,
+        boat: { ...extracted.boat, category, product_type: productType },
+      }
       const warnings = validateImportPayload(parsed)
 
       return { payload: parsed, warnings }

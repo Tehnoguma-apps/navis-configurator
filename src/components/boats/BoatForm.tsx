@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils'
 import { ds } from '@/lib/styles'
 import { boatSchema, type BoatFormData } from '@/lib/validators'
 import { useBoatBrands } from '@/hooks/useBoats'
+import { BOAT_CATEGORIES, PRODUCT_TYPES } from '@/lib/catalog'
 
 interface BoatFormProps {
   defaultValues?: Partial<BoatFormData>
@@ -38,6 +39,7 @@ export const BoatForm = ({
     defaultValues: {
       brand: 'Azimut',
       category: 'new',
+      product_type: 'yacht',
       ...defaultValues,
     },
   })
@@ -127,8 +129,21 @@ export const BoatForm = ({
         </div>
       </div>
 
-      {/* Row 3: Category + Base Price */}
+      {/* Row 3: Product type + Category */}
       <div className={ds.form.grid}>
+        <div>
+          <label className={ds.input.label}>
+            {t('catalog.productType')}
+          </label>
+          <select
+            {...register('product_type')}
+            className={ds.input.select}
+          >
+            {PRODUCT_TYPES.map((type) => (
+              <option key={type} value={type}>{t(`catalog.types.${type}`)}</option>
+            ))}
+          </select>
+        </div>
         <div>
           <label className={ds.input.label}>
             {t('boats.category')}
@@ -137,10 +152,15 @@ export const BoatForm = ({
             {...register('category')}
             className={ds.input.select}
           >
-            <option value="new">{t('boats.new')}</option>
-            <option value="used">{t('boats.used')}</option>
+            {BOAT_CATEGORIES.map((category) => (
+              <option key={category} value={category}>{t(`boats.${category}`)}</option>
+            ))}
           </select>
         </div>
+      </div>
+
+      {/* Row 4: Base Price */}
+      <div className={ds.form.grid}>
         <div>
           <label className={ds.input.label}>
             {t('boats.basePrice')} *

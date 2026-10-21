@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils'
 import { ds } from '@/lib/styles'
 import { formatPrice } from '@/lib/formatters'
 import { useConfiguratorStore } from '@/stores/configurator-store'
+import { getProductType } from '@/lib/catalog'
 import type { DiscountLevel, DiscountType } from '@/types'
 
 interface CompactDiscountEditorProps {
@@ -22,7 +23,8 @@ interface DiscountRow {
 
 export function CompactDiscountEditor({ boatBasePrice, equipmentSubtotal, discountableEquipmentSubtotal }: CompactDiscountEditorProps) {
   const { t } = useTranslation()
-  const { discounts, addDiscount, removeDiscount, templateGroupId } = useConfiguratorStore()
+  const { discounts, addDiscount, removeDiscount, templateGroupId, selectedBoat } = useConfiguratorStore()
+  const productContext = getProductType(selectedBoat)
 
   const boatDiscounts = discounts.filter((d) => d.level === 'boat_base')
   const equipmentDiscounts = discounts.filter((d) => d.level === 'equipment_all')
@@ -37,8 +39,8 @@ export function CompactDiscountEditor({ boatBasePrice, equipmentSubtotal, discou
         </div>
       )}
       <DiscountSection
-        title={t('configurator.boatDiscount')}
-        hint={t('configurator.boatDiscountHint')}
+        title={t('configurator.boatDiscount', { context: productContext })}
+        hint={t('configurator.boatDiscountHint', { context: productContext })}
         level="boat_base"
         baseAmount={boatBasePrice}
         activeDiscounts={boatDiscounts}

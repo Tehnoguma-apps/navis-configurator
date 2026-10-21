@@ -3,28 +3,46 @@ import { useTranslation } from 'react-i18next'
 import { Search, Plus, ArrowUpDown, FileUp } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ds } from '@/lib/styles'
+import {
+  buildCatalogView,
+  isBoatCategory,
+  isProductType,
+  resolveBrandLocation,
+  type BoatSort,
+} from '@/lib/catalog'
 import { useBoats } from '@/hooks/useBoats'
 import { useAuth } from '@/hooks/useAuth'
-import { useQueryParam } from '@/hooks/useQueryParams'
+import { useQueryParam, useSetQueryParams } from '@/hooks/useQueryParams'
 import { BoatGrid } from '@/components/boats/BoatGrid'
 import { BoatDetailPanel } from '@/components/boats/BoatDetailPanel'
 import { PriceImportModal } from '@/components/boats/PriceImportModal'
-import type { BoatCategory } from '@/types'
+import { ProductTypeTabs } from '@/components/catalog/ProductTypeTabs'
+import { CatalogCategoryTabs } from '@/components/catalog/CatalogCategoryTabs'
+import { CatalogSearchInput } from '@/components/catalog/CatalogSearchInput'
+import { CatalogBreadcrumb } from '@/components/catalog/CatalogBreadcrumb'
+import { CatalogSectionHeading } from '@/components/catalog/CatalogSectionHeading'
+import { BrandGrid } from '@/components/catalog/BrandGrid'
+import { QueryErrorState } from '@/components/ui/QueryErrorState'
+import type { BoatCategory, ProductType } from '@/types'
 
-type SortOption = 'price_desc' | 'price_asc' | 'name' | 'year'
+const SORT_OPTIONS: readonly BoatSort[] = ['price_desc', 'price_asc', 'name', 'year'] as const
 
 export default function BoatsListPage() {
   const { t } = useTranslation()
   const { isAdmin } = useAuth()
-  const { data: boats, isLoading } = useBoats()
+  const { data: boats, isLoading, error, refetch } = useBoats()
 
   const [search, setSearch] = useQueryParam('search')
-  const [categoryParam, setCategoryParam] = useQueryParam('category', 'all')
+  const [typeParam] = useQueryParam('type', 'yacht')
+  const [categoryParam] = useQueryParam('category', 'new')
+  const [brandParam, setBrandParam] = useQueryParam('brand')
   const [sortParam, setSortParam] = useQueryParam('sort', 'price_desc')
   const [boatParam, setBoatParam] = useQueryParam('boat')
+  const setParams = useSetQueryParams()
 
-  const categoryFilter = categoryParam as BoatCategory | 'all'
-  const sort = sortParam as SortOption
+  const productType: ProductType = isProductType(typeParam) ? typeParam : 'yacht'
+  const category: BoatCategory = isBoatCategory(categoryParam) ? categoryParam : 'new'
+  const sort: BoatSort = (SORT_OPTIONS as readonly string[]).includes(sortParam) ? (sortParam as BoatSort) : 'price_desc'
 
   const [searchInput, setSearchInput] = useState(search)
   const [panelMode, setPanelMode] = useState<'view' | 'edit' | 'create'>('view')
@@ -39,38 +57,30 @@ export default function BoatsListPage() {
     return () => clearTimeout(timer)
   }, [searchInput, setSearch])
 
-  // Client-side filter + sort (small dataset)
-  const filteredBoats = useMemo(() => {
-    if (!boats) return []
+  const view = useMemo(
+    () => buildCatalogView(boats ?? [], { productType, category, brand: brandParam, search, sort }),
+    [boats, productType, category, brandParam, search, sort],
+  )
 
-    let result = [...boats]
+  const handleTypeChange = useCallback((value: ProductType) => {
+    setParams({ type: value, brand: '' })
+  }, [setParams])
 
+  const handleCategoryChange = useCallback((value: BoatCategory) => {
+    // Picking a category leaves search mode
+    setSearchInput('')
+    setParams({ category: value, search: '' })
+  }, [setParams])
+
+  const handleSelectBrand = useCallback((brand: string) => {
     if (search) {
-      const q = search.toLowerCase()
-      result = result.filter((b) => b.name.toLowerCase().includes(q))
+      const target = resolveBrandLocation(boats ?? [], brand, { productType, category })
+      setSearchInput('')
+      setParams({ type: target.productType, category: target.category, search: '', brand })
+    } else {
+      setParams({ brand })
     }
-
-    if (categoryFilter !== 'all') {
-      result = result.filter((b) => b.category === categoryFilter)
-    }
-
-    switch (sort) {
-      case 'price_asc':
-        result.sort((a, b) => a.base_price - b.base_price)
-        break
-      case 'price_desc':
-        result.sort((a, b) => b.base_price - a.base_price)
-        break
-      case 'name':
-        result.sort((a, b) => a.name.localeCompare(b.name))
-        break
-      case 'year':
-        result.sort((a, b) => (b.year ?? 0) - (a.year ?? 0))
-        break
-    }
-
-    return result
-  }, [boats, search, categoryFilter, sort])
+  }, [boats, search, productType, category, setParams])
 
   const handleSelectBoat = useCallback((id: string) => {
     setBoatParam(id)
@@ -97,114 +107,151 @@ export default function BoatsListPage() {
     setPanelMode('view')
   }, [setBoatParam])
 
-  const categoryTabs: { value: BoatCategory | 'all'; label: string }[] = [
-    { value: 'all', label: t('common.all') },
-    { value: 'new', label: t('boats.new') },
-    { value: 'used', label: t('boats.used') },
-  ]
+  const createDefaults = useMemo(
+    () => ({ product_type: productType, category, ...(view.activeBrand ? { brand: view.activeBrand } : {}) }),
+    [productType, category, view.activeBrand],
+  )
 
-  const sortOptions: { value: SortOption; label: string }[] = [
+  const showModels = view.isSearching || !!view.activeBrand
+
+  const sortOptions: { value: BoatSort; label: string }[] = [
     { value: 'price_desc', label: `${t('boats.sortByPrice')} ${t('boats.sortDesc')}` },
     { value: 'price_asc', label: `${t('boats.sortByPrice')} ${t('boats.sortAsc')}` },
     { value: 'name', label: t('boats.sortByName') },
     { value: 'year', label: t('boats.sortByYear') },
   ]
 
-  return (
-    <div className={ds.page.spacing}>
-      {/* Header */}
-      <div className={ds.page.header}>
-        <h1 className={ds.page.title}>
-          {t('boats.title')}
-        </h1>
-        {isAdmin && (
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setImportModalOpen(true)}
-              className={cn(ds.btn.base, ds.btn.md, ds.btn.secondary)}
-            >
-              <FileUp className="h-4 w-4" />
-              {t('boats.importFromPriceList')}
-            </button>
-            <button
-              type="button"
-              onClick={handleAddBoat}
-              className={cn(ds.btn.base, ds.btn.md, ds.btn.primary)}
-            >
-              <Plus className="h-4 w-4" />
-              {t('boats.addBoat')}
-            </button>
-          </div>
-        )}
-      </div>
+  const emptyMessage = t('catalog.emptyCategory', { label: t(`catalog.categories.${category}`, { context: productType }) })
 
-      {/* Filters bar — compact */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="relative max-w-xs flex-1">
-          <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-          <input
-            type="text"
-            placeholder={t('common.search')}
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            className="h-8 w-full rounded-lg border border-input bg-background pl-8 pr-3 text-xs outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary"
+  return (
+    <div className="space-y-4">
+      {/* Header: title + product types | category tiles */}
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between lg:gap-6">
+        <div className="min-w-0 space-y-1">
+          <h1 className="font-display text-2xl font-semibold text-navy">
+            {t('boats.title')}
+          </h1>
+          <ProductTypeTabs
+            value={productType}
+            onChange={handleTypeChange}
+            counts={view.typeCounts}
+            className="-ml-3 sm:-ml-3.5"
           />
         </div>
+        <CatalogCategoryTabs
+          value={view.isSearching ? null : category}
+          onChange={handleCategoryChange}
+          counts={view.categoryCounts}
+          productType={productType}
+          className="w-full lg:w-auto"
+        />
+      </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="-mx-1 flex overflow-x-auto px-1 sm:mx-0 sm:px-0">
-            <div className="flex rounded-lg border border-border">
-              {categoryTabs.map((tab) => (
-                <button
-                  key={tab.value}
-                  type="button"
-                  onClick={() => setCategoryParam(tab.value)}
-                  className={cn(
-                    'whitespace-nowrap px-2.5 py-1.5 text-xs font-medium transition-colors first:rounded-l-lg last:rounded-r-lg',
-                    categoryFilter === tab.value
-                      ? 'bg-navy text-white'
-                      : 'text-muted-foreground hover:bg-muted'
-                  )}
-                >
-                  {tab.label}
-                </button>
-              ))}
+      {/* Toolbar: search, sort, admin actions */}
+      <div className="flex flex-col gap-2 border-y border-border/60 py-2.5 sm:flex-row sm:items-center">
+        <CatalogSearchInput
+          value={searchInput}
+          onChange={setSearchInput}
+          className="w-full sm:max-w-sm sm:flex-1"
+        />
+        <div className="flex items-center gap-2 sm:ml-auto">
+          {showModels && (
+            <div className="relative">
+              <ArrowUpDown className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+              <select
+                value={sort}
+                onChange={(e) => setSortParam(e.target.value)}
+                aria-label={t('catalog.sort')}
+                className="h-11 appearance-none rounded-lg border border-input bg-white pl-8 pr-6 text-xs outline-none focus:border-primary focus:ring-1 focus:ring-primary sm:h-9"
+              >
+                {sortOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
             </div>
-          </div>
-
-          <div className="relative">
-            <ArrowUpDown className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-            <select
-              value={sort}
-              onChange={(e) => setSortParam(e.target.value)}
-              className="h-8 appearance-none rounded-lg border border-input bg-background pl-8 pr-6 text-xs outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-            >
-              {sortOptions.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-          </div>
+          )}
+          {isAdmin && (
+            <>
+              <button
+                type="button"
+                onClick={() => setImportModalOpen(true)}
+                className={cn(ds.btn.base, ds.btn.md, ds.btn.secondary, 'h-11 flex-1 sm:h-9 sm:flex-none')}
+              >
+                <FileUp className="h-4 w-4" />
+                {t('boats.importFromPriceList')}
+              </button>
+              <button
+                type="button"
+                onClick={handleAddBoat}
+                className={cn(ds.btn.base, ds.btn.md, ds.btn.primary, 'h-11 flex-1 sm:h-9 sm:flex-none')}
+              >
+                <Plus className="h-4 w-4" />
+                {t('boats.addBoat')}
+              </button>
+            </>
+          )}
         </div>
       </div>
 
       {/* Main content: catalog + side panel */}
       <div className="flex gap-4">
-        {/* Catalog */}
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 flex-1 space-y-5">
           {isLoading ? (
             <SkeletonGrid isPanelOpen={isPanelOpen} />
-          ) : filteredBoats.length === 0 ? (
-            <EmptyState message={t('boats.noBoats')} />
+          ) : error ? (
+            <QueryErrorState onRetry={refetch} />
+          ) : view.isSearching ? (
+            view.searchBrands.length === 0 && view.searchModels.length === 0 ? (
+              <EmptyState message={t('catalog.noResults', { query: search })} />
+            ) : (
+              <>
+                {view.searchBrands.length > 0 && (
+                  <section>
+                    <CatalogSectionHeading title={t('catalog.brands')} count={view.searchBrands.length} />
+                    <BrandGrid brands={view.searchBrands} onSelectBrand={handleSelectBrand} isPanelOpen={isPanelOpen} />
+                  </section>
+                )}
+                {view.searchModels.length > 0 && (
+                  <section>
+                    <CatalogSectionHeading title={t('catalog.models')} count={view.searchModels.length} />
+                    <BoatGrid
+                      boats={view.searchModels}
+                      selectedBoatId={selectedBoatId}
+                      onSelectBoat={handleSelectBoat}
+                      isPanelOpen={isPanelOpen}
+                      showType
+                    />
+                  </section>
+                )}
+              </>
+            )
+          ) : view.activeBrand ? (
+            <section className="space-y-2">
+              {view.isSingleBrand ? (
+                <CatalogSectionHeading title={view.activeBrand} count={view.models.length} />
+              ) : (
+                <CatalogBreadcrumb
+                  brand={view.activeBrand}
+                  count={view.models.length}
+                  onBack={() => setBrandParam('')}
+                />
+              )}
+              <BoatGrid
+                boats={view.models}
+                selectedBoatId={selectedBoatId}
+                onSelectBoat={handleSelectBoat}
+                isPanelOpen={isPanelOpen}
+              />
+            </section>
+          ) : view.brands.length === 0 ? (
+            <EmptyState message={emptyMessage} />
           ) : (
-            <BoatGrid
-              boats={filteredBoats}
-              selectedBoatId={selectedBoatId}
-              onSelectBoat={handleSelectBoat}
-              isPanelOpen={isPanelOpen}
-            />
+            <section>
+              <CatalogSectionHeading title={t('catalog.chooseBrand')} count={view.brands.length} />
+              <BrandGrid brands={view.brands} onSelectBrand={handleSelectBrand} isPanelOpen={isPanelOpen} />
+            </section>
           )}
         </div>
 
@@ -219,6 +266,7 @@ export default function BoatsListPage() {
                 onClose={handleClosePanel}
                 onModeChange={setPanelMode}
                 onBoatCreated={handleBoatCreated}
+                createDefaults={createDefaults}
               />
             </div>
           </div>
@@ -240,6 +288,7 @@ export default function BoatsListPage() {
               onClose={handleClosePanel}
               onModeChange={setPanelMode}
               onBoatCreated={handleBoatCreated}
+              createDefaults={createDefaults}
             />
           </div>
         </div>
@@ -250,6 +299,8 @@ export default function BoatsListPage() {
         open={importModalOpen}
         onOpenChange={setImportModalOpen}
         onSuccess={handleImportSuccess}
+        defaultProductType={productType}
+        defaultCategory={category}
       />
     </div>
   )
@@ -258,19 +309,13 @@ export default function BoatsListPage() {
 function SkeletonGrid({ isPanelOpen }: { isPanelOpen: boolean }) {
   return (
     <div className={cn(
-      'grid gap-4',
+      'grid gap-2.5',
       isPanelOpen
-        ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
-        : 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'
+        ? 'grid-cols-2 xl:grid-cols-3'
+        : 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'
     )}>
-      {[1, 2, 3, 4].map((i) => (
-        <div key={i} className={cn('animate-pulse overflow-hidden', ds.card.base)}>
-          <div className="h-[140px] bg-muted" />
-          <div className="space-y-2 p-3">
-            <div className={cn(ds.skeleton.line, 'w-3/4')} />
-            <div className={cn(ds.skeleton.line, 'w-1/2')} />
-          </div>
-        </div>
+      {[1, 2, 3, 4, 5].map((i) => (
+        <div key={i} className="h-32 animate-pulse rounded-xl bg-muted sm:h-36" />
       ))}
     </div>
   )

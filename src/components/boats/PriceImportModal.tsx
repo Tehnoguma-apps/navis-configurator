@@ -7,12 +7,19 @@ import { formatPrice } from '@/lib/formatters'
 import { useExtractPriceList, useSaveImportedBoat } from '@/hooks/usePriceImport'
 import { useBoats } from '@/hooks/useBoats'
 import { ResponsiveModal } from '@/components/ui/ResponsiveModal'
+import { ProductTypeTabs } from '@/components/catalog/ProductTypeTabs'
+import { CatalogCategoryTabs } from '@/components/catalog/CatalogCategoryTabs'
 import type { ImportPayload, ImportedCategory, ImportedItem, ImportedSpec, ImportWarning } from '@/lib/price-import'
+import type { BoatCategory, ProductType } from '@/types'
 
 interface PriceImportModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onSuccess: (boatId: string) => void
+  /** Preselected product type (the active catalog tab). */
+  defaultProductType?: ProductType
+  /** Preselected category (the active catalog tab). */
+  defaultCategory?: BoatCategory
 }
 
 type Step = 1 | 2 | 3
@@ -23,11 +30,29 @@ const STEPS: { step: Step; key: string }[] = [
   { step: 3, key: 'importStepSave' },
 ]
 
-export const PriceImportModal = ({ open, onOpenChange, onSuccess }: PriceImportModalProps) => {
+export const PriceImportModal = ({
+  open,
+  onOpenChange,
+  onSuccess,
+  defaultProductType = 'yacht',
+  defaultCategory = 'new',
+}: PriceImportModalProps) => {
   const { t } = useTranslation()
   const [step, setStep] = useState<Step>(1)
   const [payload, setPayload] = useState<ImportPayload | null>(null)
   const [warnings, setWarnings] = useState<ImportWarning[]>([])
+  const [productType, setProductType] = useState<ProductType>(defaultProductType)
+  const [category, setCategory] = useState<BoatCategory>(defaultCategory)
+
+  // Each time the modal opens, preselect the catalog's active type + category.
+  const [wasOpen, setWasOpen] = useState(open)
+  if (open !== wasOpen) {
+    setWasOpen(open)
+    if (open) {
+      setProductType(defaultProductType)
+      setCategory(defaultCategory)
+    }
+  }
 
   const extract = useExtractPriceList()
   const save = useSaveImportedBoat()
@@ -124,6 +149,10 @@ export const PriceImportModal = ({ open, onOpenChange, onSuccess }: PriceImportM
         <UploadStep
           onExtracted={handleExtracted}
           extract={extract}
+          productType={productType}
+          category={category}
+          onProductTypeChange={setProductType}
+          onCategoryChange={setCategory}
         />
       )}
 
@@ -150,17 +179,28 @@ export const PriceImportModal = ({ open, onOpenChange, onSuccess }: PriceImportM
 interface UploadStepProps {
   onExtracted: (result: { payload: ImportPayload; warnings: ImportWarning[] }) => void
   extract: ReturnType<typeof useExtractPriceList>
+  productType: ProductType
+  category: BoatCategory
+  onProductTypeChange: (value: ProductType) => void
+  onCategoryChange: (value: BoatCategory) => void
 }
 
-function UploadStep({ onExtracted, extract }: UploadStepProps) {
+function UploadStep({
+  onExtracted,
+  extract,
+  productType,
+  category,
+  onProductTypeChange,
+  onCategoryChange,
+}: UploadStepProps) {
   const { t } = useTranslation()
   const [dragOver, setDragOver] = useState(false)
 
   const handleFile = useCallback((file: File) => {
     if (file.type !== 'application/pdf') return
     if (file.size > 50 * 1024 * 1024) return
-    extract.mutate(file, { onSuccess: onExtracted })
-  }, [extract, onExtracted])
+    extract.mutate({ file, productType, category }, { onSuccess: onExtracted })
+  }, [extract, onExtracted, productType, category])
 
   const handleDrop = useCallback((e: DragEvent) => {
     e.preventDefault()
@@ -180,7 +220,7 @@ function UploadStep({ onExtracted, extract }: UploadStepProps) {
         <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
         <p className="text-sm font-medium text-navy">{t('boats.importUploading')}</p>
         <p className="text-xs text-muted-foreground mt-1">
-          This may take 1-2 minutes
+          {t('boats.importDuration')}
         </p>
       </div>
     )
@@ -188,6 +228,13 @@ function UploadStep({ onExtracted, extract }: UploadStepProps) {
 
   return (
     <div className="space-y-4">
+      <ImportTargetPicker
+        productType={productType}
+        category={category}
+        onProductTypeChange={onProductTypeChange}
+        onCategoryChange={onCategoryChange}
+      />
+
       <div
         onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
         onDragLeave={() => setDragOver(false)}
@@ -336,6 +383,13 @@ function PreviewStep({ payload, warnings, onChange }: PreviewStepProps) {
       {/* Boat info */}
       <section className={ds.card.padded}>
         <h3 className={cn(ds.card.title, ds.card.titleMargin)}>{t('boats.importBoatInfo')}</h3>
+        <ImportTargetPicker
+          className="mb-3"
+          productType={payload.boat.product_type ?? 'yacht'}
+          category={payload.boat.category ?? 'new'}
+          onProductTypeChange={(v) => onChange({ ...payload, boat: { ...payload.boat, product_type: v } })}
+          onCategoryChange={(v) => onChange({ ...payload, boat: { ...payload.boat, category: v } })}
+        />
         <div className={ds.form.grid}>
           <EditableField label={t('boats.name')} value={payload.boat.name} onChange={(v) => updateBoatField('name', v)} />
           <EditableField label={t('boats.brand')} value={payload.boat.brand} onChange={(v) => updateBoatField('brand', v)} />
@@ -551,6 +605,10 @@ function ConfirmStep({ payload, error }: ConfirmStepProps) {
       <div className={ds.card.padded}>
         <h3 className={cn(ds.card.title, ds.card.titleMargin)}>{t('boats.importBoatInfo')}</h3>
         <div className="grid grid-cols-2 gap-y-2 text-xs">
+          <span className="text-muted-foreground">{t('catalog.productType')}</span>
+          <span>{t(`catalog.typeSingular.${payload.boat.product_type ?? 'yacht'}`)}</span>
+          <span className="text-muted-foreground">{t('boats.category')}</span>
+          <span>{t(`boats.${payload.boat.category ?? 'new'}`)}</span>
           <span className="text-muted-foreground">{t('boats.name')}</span>
           <span className="font-medium text-navy">{payload.boat.name}</span>
           <span className="text-muted-foreground">{t('boats.brand')}</span>
@@ -612,6 +670,49 @@ function ConfirmStep({ payload, error }: ConfirmStepProps) {
           {error}
         </div>
       )}
+    </div>
+  )
+}
+
+// --- Import target (product type + category) ---
+
+interface ImportTargetPickerProps {
+  productType: ProductType
+  category: BoatCategory
+  onProductTypeChange: (value: ProductType) => void
+  onCategoryChange: (value: BoatCategory) => void
+  className?: string
+}
+
+function ImportTargetPicker({
+  productType,
+  category,
+  onProductTypeChange,
+  onCategoryChange,
+  className,
+}: ImportTargetPickerProps) {
+  const { t } = useTranslation()
+
+  return (
+    <div className={cn('grid gap-3 sm:grid-cols-2', className)}>
+      <div>
+        <p className={ds.input.label}>{t('catalog.productType')}</p>
+        <ProductTypeTabs
+          value={productType}
+          onChange={onProductTypeChange}
+          size="sm"
+          className="-ml-3 sm:-ml-3.5"
+        />
+      </div>
+      <div>
+        <p className={ds.input.label}>{t('boats.category')}</p>
+        <CatalogCategoryTabs
+          value={category}
+          onChange={onCategoryChange}
+          variant="compact"
+          className="w-full"
+        />
+      </div>
     </div>
   )
 }

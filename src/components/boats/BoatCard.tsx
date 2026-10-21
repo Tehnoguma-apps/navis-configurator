@@ -5,15 +5,20 @@ import { Ship } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { formatPrice } from '@/lib/formatters'
 import { supabase } from '@/lib/supabase'
+import { getBoatCategory, getProductType } from '@/lib/catalog'
+import { CategoryBadge } from '@/components/catalog/CategoryBadge'
 import type { Boat } from '@/types'
 
 interface BoatCardProps {
   boat: Boat
   isSelected?: boolean
   onSelect?: (id: string) => void
+  /** Show the product type (tender / toy) badge, e.g. in cross-catalog search results. */
+  showType?: boolean
 }
 
-export const BoatCard = ({ boat, isSelected, onSelect }: BoatCardProps) => {
+export const BoatCard = ({ boat, isSelected, onSelect, showType }: BoatCardProps) => {
+  const productType = getProductType(boat)
   const { t } = useTranslation()
   const queryClient = useQueryClient()
 
@@ -39,7 +44,7 @@ export const BoatCard = ({ boat, isSelected, onSelect }: BoatCardProps) => {
       onClick={() => onSelect?.(boat.id)}
       onMouseEnter={handlePrefetch}
       className={cn(
-        'group relative flex flex-col overflow-hidden rounded-xl border bg-card text-left transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+        'group relative flex flex-col overflow-hidden rounded-lg border bg-card text-left transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
         isSelected
           ? 'border-primary ring-2 ring-primary/30 shadow-lg shadow-primary/10'
           : 'border-border/60 hover:border-border hover:shadow-lg hover:shadow-navy/5'
@@ -56,27 +61,23 @@ export const BoatCard = ({ boat, isSelected, onSelect }: BoatCardProps) => {
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-muted to-muted/50">
-            <Ship className="h-10 w-10 text-border" strokeWidth={1} />
+            <Ship className="h-8 w-8 text-border" strokeWidth={1} />
           </div>
         )}
 
-        {/* Category badge */}
-        <div className="absolute right-2.5 top-2.5">
-          <span
-            className={cn(
-              'rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider backdrop-blur-sm',
-              boat.category === 'new'
-                ? 'bg-success/85 text-white'
-                : 'bg-warning/85 text-white'
-            )}
-          >
-            {t(`boats.${boat.category}`)}
-          </span>
+        {/* Category + type badges */}
+        <div className="absolute right-2 top-2 flex flex-col items-end gap-1">
+          <CategoryBadge category={getBoatCategory(boat)} />
+          {showType && productType !== 'yacht' && (
+            <span className="rounded-md bg-navy/80 px-1.5 py-0.5 text-[10px] font-semibold text-white backdrop-blur-sm">
+              {t(`catalog.typeSingular.${productType}`)}
+            </span>
+          )}
         </div>
 
         {/* Selected indicator */}
         {isSelected && (
-          <div className="absolute left-2.5 top-2.5 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-white shadow-md">
+          <div className="absolute left-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-white shadow-md">
             <svg className="h-3 w-3" viewBox="0 0 12 12" fill="none">
               <path d="M2.5 6L5 8.5L9.5 3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
@@ -84,28 +85,18 @@ export const BoatCard = ({ boat, isSelected, onSelect }: BoatCardProps) => {
         )}
       </div>
 
-      {/* Info — outside the image, clean and readable */}
-      <div className="flex flex-1 flex-col px-3.5 pb-3.5 pt-3">
-        {/* Boat name — prominent */}
-        <h3 className="font-display text-base font-semibold leading-snug text-navy transition-colors duration-200 group-hover:text-primary">
+      {/* Info */}
+      <div className="flex flex-1 flex-col px-2.5 pb-2.5 pt-2">
+        <h3 className="line-clamp-2 font-display text-sm font-semibold leading-snug text-navy transition-colors duration-200 group-hover:text-primary">
           {boat.name}
         </h3>
-
-        {/* Brand + Year */}
-        <p className="mt-1 text-xs text-muted-foreground">
+        <p className="mt-0.5 truncate text-[11px] text-muted-foreground">
           {boat.brand}
           {boat.year && <> &middot; {boat.year}</>}
         </p>
-
-        {/* Price — gold accent with separator */}
-        <div className="mt-2.5 flex items-center justify-between border-t border-border/50 pt-2.5">
-          <p className="font-display text-sm font-bold tracking-tight text-gold">
-            {formatPrice(boat.base_price)}
-          </p>
-          <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground/60">
-            EUR
-          </span>
-        </div>
+        <p className="mt-auto pt-1.5 font-display text-sm font-bold tracking-tight text-gold-dark lining-nums">
+          {formatPrice(boat.base_price)}
+        </p>
       </div>
     </button>
   )

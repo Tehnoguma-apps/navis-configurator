@@ -1,6 +1,8 @@
 import { useTranslation } from 'react-i18next'
 import { formatPrice } from '@/lib/formatters'
 import { getLocalizedName } from '@/lib/i18n-helpers'
+import { getProductType } from '@/lib/catalog'
+import { useConfiguratorStore } from '@/stores/configurator-store'
 import type { ConfiguratorDiscount, EquipmentItem, PriceBreakdown } from '@/types'
 
 interface CompactPriceSidebarProps {
@@ -29,6 +31,7 @@ export function PriceContent({
 }: PriceContentProps) {
   const { t, i18n } = useTranslation()
   const lang = i18n.language as 'hr' | 'en'
+  const productContext = getProductType(useConfiguratorStore((s) => s.selectedBoat))
 
   const hasBoatDiscounts = priceBreakdown.boatDiscounts > 0
   const hasItemDiscounts = priceBreakdown.equipmentItemDiscounts > 0
@@ -51,7 +54,7 @@ export function PriceContent({
               <div key={d.id} className="flex items-center justify-between pl-3 text-[11px]">
                 <span className="flex items-center gap-1 text-red-600">
                   <span className="text-red-400">&minus;</span>
-                  {d.description ?? t('configurator.boatDiscount')}
+                  {d.description ?? t('configurator.boatDiscount', { context: productContext })}
                   {d.type === 'percentage' ? ` (${d.value}%)` : ''}
                 </span>
                 <span className="font-medium text-red-600">
@@ -65,7 +68,7 @@ export function PriceContent({
             ))}
           <div className="flex items-center justify-between text-xs">
             <span className="font-medium text-muted-foreground">
-              {t('configurator.boatFinalPrice')}
+              {t('configurator.boatFinalPrice', { context: productContext })}
             </span>
             <span className="font-medium">{formatPrice(priceBreakdown.boatFinalPrice)}</span>
           </div>

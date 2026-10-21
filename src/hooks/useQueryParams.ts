@@ -16,3 +16,24 @@ export function useQueryParam(key: string, defaultValue = '') {
 
   return [value, setValue] as const
 }
+
+/**
+ * Update several query params in one navigation. Separate useQueryParam setters
+ * called in the same tick overwrite each other (each starts from the same
+ * snapshot), so batch related changes through this instead.
+ * Empty string removes a param.
+ */
+export function useSetQueryParams(): (updates: Record<string, string>) => void {
+  const [, setSearchParams] = useSearchParams()
+
+  return useCallback((updates: Record<string, string>) => {
+    setSearchParams(prev => {
+      const next = new URLSearchParams(prev)
+      for (const [key, value] of Object.entries(updates)) {
+        if (value) next.set(key, value)
+        else next.delete(key)
+      }
+      return next
+    }, { replace: true })
+  }, [setSearchParams])
+}

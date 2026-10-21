@@ -82,6 +82,8 @@ export const QuickQuoteModal = ({
   // Get boat base price (special price from template or original)
   const selectedTemplateBoat = boats.find((b) => b.boat_id === effectiveBoatId)
   const selectedBoatData = boats.find((b) => b.boat_id === effectiveBoatId)?.boat
+  // i18n context for product-specific labels (yacht / tender / toy)
+  const productSuffix = selectedBoatData?.product_type && selectedBoatData.product_type !== 'yacht' ? `_${selectedBoatData.product_type}` : ''
   const boatBasePrice =
     selectedTemplateBoat?.special_price ?? selectedBoatData?.base_price ?? 0
 
@@ -311,8 +313,8 @@ export const QuickQuoteModal = ({
                 </h4>
                 <div className="space-y-1.5">
                   <DiscountSection
-                    title={t('configurator.boatDiscount')}
-                    hint={t('configurator.boatDiscountHint')}
+                    title={t(`configurator.boatDiscount${productSuffix}`)}
+                    hint={t(`configurator.boatDiscountHint${productSuffix}`)}
                     level="boat_base"
                     baseAmount={boatBasePrice}
                     activeDiscounts={boatDiscounts}

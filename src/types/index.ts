@@ -134,7 +134,8 @@ export interface ClientFormData {
 
 // Quote status
 export type QuoteStatus = 'draft' | 'sent' | 'accepted' | 'rejected'
-export type BoatCategory = 'new' | 'used'
+export type BoatCategory = 'new' | 'used' | 'stock'
+export type ProductType = 'yacht' | 'tender' | 'toy'
 export type ClientCategory = 'vip' | 'regular' | 'prospect'
 export type ClientType = 'company' | 'individual'
 export type UserRole = 'admin' | 'sales'

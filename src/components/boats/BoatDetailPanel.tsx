@@ -22,6 +22,8 @@ import { useAuth } from '@/hooks/useAuth'
 import { BoatForm } from '@/components/boats/BoatForm'
 import { BoatEquipmentTab } from '@/components/boats/BoatEquipmentTab'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
+import { CategoryBadge } from '@/components/catalog/CategoryBadge'
+import { getBoatCategory, getProductType } from '@/lib/catalog'
 import type { BoatSpec } from '@/types'
 import type { BoatFormData } from '@/lib/validators'
 
@@ -33,6 +35,8 @@ interface BoatDetailPanelProps {
   onClose: () => void
   onModeChange: (mode: 'view' | 'edit' | 'create') => void
   onBoatCreated: (id: string) => void
+  /** Prefilled values for create mode (e.g. the active catalog type/category). */
+  createDefaults?: Partial<BoatFormData>
 }
 
 export const BoatDetailPanel = ({
@@ -41,6 +45,7 @@ export const BoatDetailPanel = ({
   onClose,
   onModeChange,
   onBoatCreated,
+  createDefaults,
 }: BoatDetailPanelProps) => {
   const { t, i18n } = useTranslation()
   const { isAdmin } = useAuth()
@@ -117,6 +122,7 @@ export const BoatDetailPanel = ({
         <PanelHeader title={t('boats.addBoat')} onClose={onClose} />
         <div className="flex-1 overflow-y-auto p-4">
           <BoatForm
+            defaultValues={createDefaults}
             onSubmit={handleCreate}
             isLoading={createBoat.isPending}
             submitLabel={t('common.create')}
@@ -161,7 +167,8 @@ export const BoatDetailPanel = ({
               brand: boat.brand ?? 'Azimut',
               model: boat.model ?? undefined,
               year: boat.year ?? undefined,
-              category: (boat.category as 'new' | 'used') ?? 'new',
+              category: getBoatCategory(boat),
+              product_type: getProductType(boat),
               base_price: boat.base_price,
               description_hr: boat.description_hr ?? undefined,
               description_en: boat.description_en ?? undefined,
@@ -259,18 +266,18 @@ export const BoatDetailPanel = ({
         <div className="border-b border-border px-4 py-3">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <span>{boat.brand}</span>
-            <span>&middot;</span>
-            <span>{boat.year}</span>
-            <span
-              className={cn(
-                'rounded-md px-2 py-0.5 text-xs font-semibold uppercase',
-                boat.category === 'new'
-                  ? 'bg-success/10 text-success'
-                  : 'bg-warning/10 text-warning'
-              )}
-            >
-              {t(`boats.${boat.category}`)}
-            </span>
+            {boat.year && (
+              <>
+                <span>&middot;</span>
+                <span>{boat.year}</span>
+              </>
+            )}
+            <CategoryBadge category={getBoatCategory(boat)} variant="soft" />
+            {getProductType(boat) !== 'yacht' && (
+              <span className={cn(ds.badge.base, ds.badge.muted)}>
+                {t(`catalog.typeSingular.${getProductType(boat)}`)}
+              </span>
+            )}
           </div>
           <p className="mt-1 font-display text-xl font-semibold text-gold">
             {formatPrice(boat.base_price)}

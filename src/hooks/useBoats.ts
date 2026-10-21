@@ -1,11 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
-import type { Boat, BoatInsert, BoatUpdate, BoatWithSpecs, EquipmentCategoryWithItems } from '@/types'
+import type { Boat, BoatCategory, BoatInsert, BoatUpdate, BoatWithSpecs, EquipmentCategoryWithItems, ProductType } from '@/types'
 import type { BoatFormData } from '@/lib/validators'
 
 interface BoatFilters {
   search?: string
-  category?: 'new' | 'used'
+  category?: BoatCategory
+  productType?: ProductType
   sort?: 'price_asc' | 'price_desc' | 'name' | 'year'
 }
 
@@ -24,6 +25,10 @@ export function useBoats(filters?: BoatFilters) {
 
       if (filters?.category) {
         query = query.eq('category', filters.category)
+      }
+
+      if (filters?.productType) {
+        query = query.eq('product_type', filters.productType)
       }
 
       switch (filters?.sort) {
@@ -116,6 +121,7 @@ export function useCreateBoat() {
         model: data.model ?? null,
         year: data.year ?? null,
         category: data.category,
+        product_type: data.product_type,
         base_price: data.base_price,
         description_hr: data.description_hr ?? null,
         description_en: data.description_en ?? null,
@@ -146,6 +152,7 @@ export function useUpdateBoat(id: string) {
         model: data.model ?? null,
         year: data.year ?? null,
         category: data.category,
+        product_type: data.product_type,
         base_price: data.base_price,
         description_hr: data.description_hr ?? null,
         description_en: data.description_en ?? null,
