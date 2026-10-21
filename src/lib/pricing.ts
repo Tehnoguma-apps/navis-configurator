@@ -27,14 +27,14 @@ export function calculateDiscountAmount(amount: number, discounts: ConfiguratorD
 }
 
 /**
- * VAT on a net amount, rounded to whole euros so the VAT line and the total
- * incl. VAT always add up and display without stray decimals ("€871.624,5").
+ * VAT on a net amount, rounded to cents so the VAT line and the total
+ * incl. VAT always add up.
  */
 export function calculateVat(
   netAmount: number,
   vatPercentage: number,
 ): { vatAmount: number; totalWithVat: number } {
-  const vatAmount = Math.round(netAmount * (vatPercentage / 100))
+  const vatAmount = Math.round(netAmount * vatPercentage) / 100
   return { vatAmount, totalWithVat: netAmount + vatAmount }
 }
 

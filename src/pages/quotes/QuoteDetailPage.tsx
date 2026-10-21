@@ -176,7 +176,9 @@ export default function QuoteDetailPage() {
     const [barcodeDataUrl, measuredLogos] = await Promise.all([
       generatePaymentBarcode(
         q.quote_number,
-        Number(q.total_price ?? 0),
+        q.vat_included
+          ? calculateVat(Number(q.total_price ?? 0), Number(q.vat_percentage ?? 25)).totalWithVat
+          : Number(q.total_price ?? 0),
         q.company?.name ?? '',
         settings!,
         q.language,
