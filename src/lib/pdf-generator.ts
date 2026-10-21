@@ -130,6 +130,11 @@ interface PdfLabels {
   directorLabel: string
   priceOnRequest: string
   tbqNote: string
+  vat: string
+  totalExclVat: string
+  totalInclVat: string
+  vatChargedNote: string
+  notAnInvoice: string
 }
 
 const labelsHr: PdfLabels = {
@@ -190,6 +195,11 @@ const labelsHr: PdfLabels = {
   directorLabel: 'Predsjednik Uprave',
   priceOnRequest: 'Na upit',
   tbqNote: 'Cijena ne uključuje stavke označene s "Na upit" (TBQ).',
+  vat: 'PDV',
+  totalExclVat: 'Ukupno bez PDV-a',
+  totalInclVat: 'Ukupno s PDV-om',
+  vatChargedNote: 'PDV se obračunava sukladno važećim propisima.',
+  notAnInvoice: 'Ova ponuda nije račun.',
 }
 
 const labelsEn: PdfLabels = {
@@ -250,6 +260,11 @@ const labelsEn: PdfLabels = {
   directorLabel: 'Director',
   priceOnRequest: 'On request',
   tbqNote: 'Price excludes items marked "On request" (TBQ).',
+  vat: 'VAT',
+  totalExclVat: 'Total excl. VAT',
+  totalInclVat: 'Total incl. VAT',
+  vatChargedNote: 'VAT will be charged in accordance with applicable regulations.',
+  notAnInvoice: 'This quotation is not an invoice.',
 }
 
 /**

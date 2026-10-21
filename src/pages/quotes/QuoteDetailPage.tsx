@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react'
 import { Link, useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { getProductType } from '@/lib/catalog'
 import { toast } from 'sonner'
 import {
   Building2,
@@ -26,6 +27,7 @@ import {
 import { cn } from '@/lib/utils'
 import { ds } from '@/lib/styles'
 import { formatPrice, formatDate } from '@/lib/formatters'
+import { calculateVat } from '@/lib/pricing'
 import { useAuth } from '@/hooks/useAuth'
 import {
   useQuote, useCopyQuote, useUpdateQuoteStatus, useUpdateQuoteDeposit, useUpdateQuoteLanguage,
@@ -175,7 +177,9 @@ export default function QuoteDetailPage() {
     const [barcodeDataUrl, measuredLogos] = await Promise.all([
       generatePaymentBarcode(
         q.quote_number,
-        Number(q.total_price ?? 0),
+        q.vat_included
+          ? calculateVat(Number(q.total_price ?? 0), Number(q.vat_percentage ?? 25)).totalWithVat
+          : Number(q.total_price ?? 0),
         q.company?.name ?? '',
         settings!,
         q.language,
@@ -439,7 +443,7 @@ export default function QuoteDetailPage() {
                   <div key={d.id} className="flex justify-between gap-2 text-xs">
                     <span className="min-w-0 truncate text-muted-foreground">
                       {d.description
-                        ?? (d.discount_level === 'boat_base' ? t('configurator.boatDiscount')
+                        ?? (d.discount_level === 'boat_base' ? t('configurator.boatDiscount', { context: getProductType(boat) })
                           : d.discount_level === 'equipment_all' ? t('configurator.equipmentWideDiscount')
                           : t('configurator.perItemDiscounts'))}
                     </span>
@@ -463,7 +467,7 @@ export default function QuoteDetailPage() {
             <div className="border-t border-gold/30 pt-2">
               <div className="flex items-baseline justify-between">
                 <span className="font-display text-sm font-semibold text-navy">
-                  {t('quotes.grandTotal')}
+                  {t('quotes.totalExclVat')}
                 </span>
                 <span className="font-display text-xl font-bold text-gold">
                   {formatPrice(Number(quote.total_price ?? 0))}
@@ -484,7 +488,7 @@ export default function QuoteDetailPage() {
                       {t('quotes.vatAmount')} ({Number(quote.vat_percentage ?? 25)}%)
                     </span>
                     <span className="font-medium">
-                      {formatPrice(Number(quote.total_price ?? 0) * Number(quote.vat_percentage ?? 25) / 100)}
+                      {formatPrice(calculateVat(Number(quote.total_price ?? 0), Number(quote.vat_percentage ?? 25)).vatAmount)}
                     </span>
                   </div>
                   <div className="flex items-baseline justify-between">
@@ -492,7 +496,7 @@ export default function QuoteDetailPage() {
                       {t('quotes.grandTotalWithVAT')}
                     </span>
                     <span className="font-display text-lg font-bold text-navy">
-                      {formatPrice(Number(quote.total_price ?? 0) * (1 + Number(quote.vat_percentage ?? 25) / 100))}
+                      {formatPrice(calculateVat(Number(quote.total_price ?? 0), Number(quote.vat_percentage ?? 25)).totalWithVat)}
                     </span>
                   </div>
                 </div>
@@ -502,7 +506,7 @@ export default function QuoteDetailPage() {
         </Card>
 
         {/* Client & Boat - top-right on desktop */}
-        <Card icon={Building2} title={`${t('quotes.clientInfo')} & ${t('quotes.boatInfo')}`} className="lg:col-span-2">
+        <Card icon={Building2} title={`${t('quotes.clientInfo')} & ${t('quotes.boatInfo', { context: getProductType(boat) })}`} className="lg:col-span-2">
           <div className="grid gap-4 sm:grid-cols-2">
             {/* Client side */}
             <div>
@@ -546,7 +550,7 @@ export default function QuoteDetailPage() {
             </div>
             {/* Boat side */}
             <div>
-              <p className={cn(ds.text.label, 'mb-1.5')}>{t('quotes.boatInfo')}</p>
+              <p className={cn(ds.text.label, 'mb-1.5')}>{t('quotes.boatInfo', { context: getProductType(boat) })}</p>
               {boat ? (
                 <div className="space-y-2">
                   {boat.hero_image_url && (
@@ -560,7 +564,7 @@ export default function QuoteDetailPage() {
                     <p className="text-sm font-medium text-navy">{boatName}</p>
                     <p className="text-xs text-muted-foreground">
                       {boat.brand}
-                      {boat.category === 'used' && boat.year && <> · {boat.year}</>}
+                      {boat.category !== 'new' && boat.year && <> · {boat.year}</>}
                     </p>
                     {boat.category === 'new' && quote.model_year && (
                       <p className="text-xs text-muted-foreground">

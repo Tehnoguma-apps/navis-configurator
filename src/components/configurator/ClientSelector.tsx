@@ -6,6 +6,8 @@ import { useCompanies } from '@/hooks/useCompanies'
 import { ClientCategoryBadge } from '@/components/clients/ClientCategoryBadge'
 import type { CompanyWithContacts, ClientCategory } from '@/types'
 
+const CATEGORY_FILTERS: (ClientCategory | 'all')[] = ['all', 'vip', 'regular', 'prospect']
+
 interface ClientSelectorProps {
   onSelectCompany: (company: CompanyWithContacts) => void
   onAddNew: () => void
@@ -20,13 +22,26 @@ export const ClientSelector = ({ onSelectCompany, onAddNew, selectedCompanyId, m
   const [search, setSearch] = useState('')
   const { data: companies, isLoading } = useCompanies()
 
-  const MAX_VISIBLE = 8
+  const [categoryFilter, setCategoryFilter] = useState<ClientCategory | 'all'>('all')
+
+  const sorted = useMemo(
+    () => [...(companies ?? [])].sort((a, b) => a.name.localeCompare(b.name, 'hr')),
+    [companies],
+  )
+
+  const categoryCounts = useMemo(() => {
+    const counts: Record<ClientCategory | 'all', number> = { all: sorted.length, vip: 0, regular: 0, prospect: 0 }
+    for (const c of sorted) counts[c.client_category as ClientCategory] += 1
+    return counts
+  }, [sorted])
 
   const filtered = useMemo(() => {
-    if (!companies) return []
-    if (!search.trim()) return companies
+    const byCategory = categoryFilter === 'all'
+      ? sorted
+      : sorted.filter((c) => c.client_category === categoryFilter)
+    if (!search.trim()) return byCategory
     const q = search.toLowerCase()
-    return companies.filter((c) => {
+    return byCategory.filter((c) => {
       if (c.name.toLowerCase().includes(q)) return true
       if (c.email?.toLowerCase().includes(q)) return true
       return c.contacts.some(
@@ -35,10 +50,7 @@ export const ClientSelector = ({ onSelectCompany, onAddNew, selectedCompanyId, m
           ct.email?.toLowerCase().includes(q)
       )
     })
-  }, [companies, search])
-
-  const displayed = filtered.slice(0, MAX_VISIBLE)
-  const hasMore = filtered.length > MAX_VISIBLE
+  }, [sorted, search, categoryFilter])
 
   return (
     <div className="space-y-2">
@@ -64,7 +76,37 @@ export const ClientSelector = ({ onSelectCompany, onAddNew, selectedCompanyId, m
         </button>
       </div>
 
-      {/* Client cards */}
+      {/* Category filter + count */}
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex flex-wrap gap-1">
+          {CATEGORY_FILTERS.map((cat) => (
+            <button
+              key={cat}
+              type="button"
+              onClick={() => setCategoryFilter(cat)}
+              aria-pressed={categoryFilter === cat}
+              className={cn(
+                'inline-flex h-7 items-center gap-1 rounded-full border px-2.5 text-[11px] font-medium transition-colors',
+                categoryFilter === cat
+                  ? 'border-navy bg-navy text-white'
+                  : 'border-border text-muted-foreground hover:border-navy/40 hover:text-foreground',
+              )}
+            >
+              {cat === 'all' ? t('common.all') : t(`clients.${cat}`)}
+              <span className={cn('tabular-nums', categoryFilter === cat ? 'text-white/70' : 'text-muted-foreground/70')}>
+                {categoryCounts[cat]}
+              </span>
+            </button>
+          ))}
+        </div>
+        {!isLoading && (
+          <span className="shrink-0 text-[11px] tabular-nums text-muted-foreground">
+            {t('configurator.clientsCount', { shown: String(filtered.length), total: String(sorted.length) })}
+          </span>
+        )}
+      </div>
+
+      {/* Client list */}
       {isLoading ? (
         <div className="grid gap-2 sm:grid-cols-2">
           {[1, 2, 3, 4].map((i) => (
@@ -79,9 +121,9 @@ export const ClientSelector = ({ onSelectCompany, onAddNew, selectedCompanyId, m
           </p>
         </div>
       ) : (
-        <div className="space-y-2">
-          <div className="grid gap-2 sm:grid-cols-2">
-            {displayed.map((company) => {
+        <div className="max-h-[26rem] overflow-y-auto overscroll-contain rounded-md border border-border/60 p-1.5">
+          <div className="grid gap-1.5 sm:grid-cols-2">
+            {filtered.map((company) => {
               const primaryContact = company.contacts.find((c) => c.is_primary) ?? company.contacts[0]
               const isSelected = multiSelect
                 ? selectedCompanyIds?.includes(company.id) ?? false
@@ -93,10 +135,10 @@ export const ClientSelector = ({ onSelectCompany, onAddNew, selectedCompanyId, m
                   type="button"
                   onClick={() => multiSelect && onToggleCompany ? onToggleCompany(company) : onSelectCompany(company)}
                   className={cn(
-                    'flex items-start gap-2.5 rounded-md border p-3 text-left transition-all duration-200',
+                    'flex min-h-11 items-start gap-2.5 rounded-md border px-3 py-2 text-left transition-colors duration-150',
                     isSelected
-                      ? 'border-gold/60 bg-gold/5 ring-2 ring-gold/20 shadow-sm'
-                      : 'border-border hover:shadow-sm hover:-translate-y-px',
+                      ? 'border-gold/60 bg-gold/5 ring-2 ring-gold/20'
+                      : 'border-border bg-background hover:border-navy/30 hover:bg-muted/40',
                   )}
                 >
                   {multiSelect ? (
@@ -119,7 +161,7 @@ export const ClientSelector = ({ onSelectCompany, onAddNew, selectedCompanyId, m
                       <ClientCategoryBadge category={company.client_category as ClientCategory} />
                     </div>
                     {primaryContact && (
-                      <p className="mt-1 truncate text-xs text-muted-foreground">
+                      <p className="mt-0.5 truncate text-xs text-muted-foreground">
                         {primaryContact.full_name}
                         {primaryContact.email ? ` · ${primaryContact.email}` : ''}
                       </p>
@@ -129,11 +171,6 @@ export const ClientSelector = ({ onSelectCompany, onAddNew, selectedCompanyId, m
               )
             })}
           </div>
-          {hasMore && (
-            <p className="text-center text-[11px] text-muted-foreground">
-              {t('configurator.showingNofTotal', { shown: String(MAX_VISIBLE), total: String(filtered.length) })}
-            </p>
-          )}
         </div>
       )}
     </div>

@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import type { BoatCategory, ProductType } from '@/types'
 
 // --- Import payload types ---
 
@@ -10,6 +11,10 @@ export interface ImportedBoat {
   base_price: number
   description_en?: string
   description_hr?: string
+  /** Chosen by the user in the import modal (not extracted by AI). */
+  category?: BoatCategory
+  /** Chosen by the user in the import modal (not extracted by AI). */
+  product_type?: ProductType
 }
 
 export interface ImportedSpec {
@@ -85,6 +90,8 @@ const importedBoatSchema = z.object({
   base_price: z.number().positive(),
   description_en: z.string().optional().nullable().transform((v) => v ?? undefined),
   description_hr: z.string().optional().nullable().transform((v) => v ?? undefined),
+  category: z.enum(['new', 'used', 'stock']).optional(),
+  product_type: z.enum(['yacht', 'tender', 'toy']).optional(),
 })
 
 export const importPayloadSchema = z.object({

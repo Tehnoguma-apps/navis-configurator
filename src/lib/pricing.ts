@@ -27,6 +27,18 @@ export function calculateDiscountAmount(amount: number, discounts: ConfiguratorD
 }
 
 /**
+ * VAT on a net amount, rounded to cents so the VAT line and the total
+ * incl. VAT always add up.
+ */
+export function calculateVat(
+  netAmount: number,
+  vatPercentage: number,
+): { vatAmount: number; totalWithVat: number } {
+  const vatAmount = Math.round(netAmount * vatPercentage) / 100
+  return { vatAmount, totalWithVat: netAmount + vatAmount }
+}
+
+/**
  * Calculate full price breakdown for a quote.
  *
  * TBQ items (is_price_on_request=true) are excluded from all subtotals and discount calculations
@@ -103,7 +115,7 @@ export function calculatePriceBreakdown(
   const totalDiscount = boatDiscountAmount + equipmentItemDiscounts + equipmentAllDiscountsAmount
   const grandTotal = boatFinalPrice + equipmentFinalTotal
 
-  const vatAmount = vatIncluded ? grandTotal * ((vatPercentage ?? 25) / 100) : 0
+  const vatAmount = vatIncluded ? calculateVat(grandTotal, vatPercentage ?? 25).vatAmount : 0
   const grandTotalWithVat = grandTotal + vatAmount
 
   return {
