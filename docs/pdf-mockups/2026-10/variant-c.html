@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quote NM-2026-143 – Variant C Navy Premium</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root { --navy: #1a1a2e; --navy-2: #2d3561; --gold: #c9a961; --gold-ink: #8f733b; --ink: #2a2a2a; --muted: #6b6f7d; --line: #e3e5ec; --card: #f4f5f9; }
+  .flow { color: var(--ink); font-size: 7.4pt; line-height: 1.42; font-variant-numeric: tabular-nums lining-nums; }
+
+  /* Section band */
+  .band + .r.th { margin-top: 0; }
+  .band { display: flex; justify-content: space-between; align-items: center; background: var(--navy); color: #fff; padding: 4.5pt 9pt; margin: 12pt 0 7pt; border-bottom: 1.2pt solid var(--gold); }
+  .band h2 { font-family: 'Playfair Display', serif; font-weight: 500; font-size: 10.5pt; letter-spacing: .01em; }
+  .band span { font-size: 6.8pt; color: rgba(255,255,255,.7); }
+  .band span b { color: var(--gold); font-weight: 600; }
+
+  /* Parties */
+  .parties { display: grid; grid-template-columns: 1fr 1fr; gap: 10pt; margin-bottom: 9pt; }
+  .parties > div { border-left: 1.5pt solid var(--gold); padding: 1pt 0 1pt 8pt; }
+  .parties .k { font-size: 6.4pt; color: var(--muted); }
+  .parties .v { font-family: 'Playfair Display', serif; font-size: 11pt; color: var(--navy); }
+
+  /* Boat hero */
+  .hero { height: 30mm; background: linear-gradient(120deg, #dfe6ee 0%, #a9bccd 50%, #6e86a0 100%); position: relative; }
+  .hero span { position: absolute; right: 9pt; top: 7pt; font-size: 6.4pt; color: rgba(26,26,46,.6); }
+  .boat { background: var(--navy); color: #fff; padding: 11pt 12pt 10pt; }
+  .boat .top { display: flex; justify-content: space-between; align-items: flex-end; gap: 12pt; padding-bottom: 9pt; border-bottom: .5pt solid rgba(201,169,97,.55); }
+  .boat h1 { font-family: 'Playfair Display', serif; font-weight: 400; font-size: 23pt; line-height: 1.05; }
+  .boat .hull { font-size: 7pt; color: rgba(255,255,255,.65); margin-top: 3pt; }
+  .boat .price { text-align: right; }
+  .boat .price .k { font-size: 6.6pt; color: rgba(255,255,255,.65); }
+  .boat .price .v { font-family: 'Playfair Display', serif; font-size: 17pt; color: var(--gold); line-height: 1.1; }
+  .boat dl { display: grid; grid-template-columns: repeat(5, 1fr); gap: 7pt 10pt; padding-top: 9pt; }
+  .boat dt { font-size: 6pt; color: rgba(255,255,255,.55); }
+  .boat dd { font-size: 7.2pt; color: #fff; font-weight: 500; }
+
+  /* Category cards */
+  .ch { display: grid; grid-template-columns: 1fr auto; align-items: baseline; background: var(--card); border: .6pt solid var(--line); border-bottom: .6pt solid #cfd3de; padding: 4pt 8pt; margin-top: 7pt; }
+  .ch .n { font-weight: 700; color: var(--navy); font-size: 7.8pt; }
+  .ch .n span { font-weight: 400; color: var(--muted); margin-left: 4pt; font-size: 6.6pt; }
+  .ch .s { font-size: 6.6pt; color: var(--muted); }
+  .ch .s b { color: var(--gold-ink); font-weight: 700; font-size: 7.8pt; margin-left: 5pt; }
+  .r { display: grid; grid-template-columns: 1fr 18pt 52pt 40pt 56pt; column-gap: 6pt; padding: 2.1pt 8pt; border-left: .6pt solid var(--line); border-right: .6pt solid var(--line); align-items: baseline; }
+  .r + .r { border-top: .4pt solid #eef0f4; }
+  .r > :nth-child(n+2) { text-align: right; }
+  .r .d { color: #b6b9c3; }
+  .r.last { border-bottom: .6pt solid var(--line); }
+  .r.th { border: 0; padding-top: 0; padding-bottom: 2pt; font-size: 6.3pt; color: var(--muted); }
+  .eqsum { margin-top: 7pt; display: flex; justify-content: flex-end; align-items: baseline; gap: 12pt; color: var(--navy); font-size: 7.6pt; }
+  .eqsum b { font-size: 9pt; }
+
+  /* Totals */
+  .totals { display: grid; grid-template-columns: 1fr 70mm; border: .6pt solid var(--line); }
+  .totals .lines { padding: 6pt 10pt; }
+  .totals .l { display: flex; justify-content: space-between; padding: 2.6pt 0; border-bottom: .4pt solid #eef0f4; }
+  .totals .l.disc span:last-child { color: #a3392b; }
+  .totals .l.sub { font-size: 6.6pt; color: var(--muted); padding: 1.2pt 0 1.2pt 9pt; border: 0; }
+  .totals .l.net { font-weight: 700; color: var(--navy); border-top: .8pt solid var(--navy); border-bottom: 0; margin-top: 2pt; }
+  .totals .grand { background: var(--navy); color: #fff; padding: 12pt 12pt 10pt; display: flex; flex-direction: column; justify-content: center; border-left: 2pt solid var(--gold); }
+  .totals .grand .k { font-size: 7pt; color: rgba(255,255,255,.7); }
+  .totals .grand .v { font-family: 'Playfair Display', serif; font-size: 20pt; color: var(--gold); line-height: 1.15; margin: 3pt 0 6pt; }
+  .totals .grand .x { font-size: 6.6pt; color: rgba(255,255,255,.7); padding-top: 5pt; border-top: .5pt solid rgba(255,255,255,.2); }
+  .totals .grand .x b { color: #fff; font-weight: 600; }
+
+  /* Standard equipment */
+  .std { columns: 3; column-gap: 8pt; }
+  .std section { background: var(--card); padding: 6pt 8pt 7pt; break-inside: avoid; margin-bottom: 8pt; }
+  .std h3 { font-family: 'Playfair Display', serif; font-weight: 500; font-size: 8.6pt; color: var(--navy); padding-bottom: 3pt; margin-bottom: 3pt; border-bottom: .6pt solid var(--gold); }
+  .std li { list-style: none; font-size: 6.7pt; line-height: 1.45; padding-left: 7pt; position: relative; }
+  .std li::before { content: ''; position: absolute; left: 0; top: .55em; width: 2.6pt; height: 2.6pt; background: var(--gold); transform: rotate(45deg); }
+
+  /* Payment */
+  .pay { display: grid; grid-template-columns: 1fr 1.25fr 66pt; gap: 12pt; align-items: start; }
+  .plan { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6pt; margin-bottom: 8pt; }
+  .plan .i { border-top: 1.5pt solid var(--gold); background: var(--card); padding: 5pt 8pt; }
+  .plan .i .p { font-family: 'Playfair Display', serif; font-size: 12pt; color: var(--navy); }
+  .plan .i .a { float: right; font-weight: 700; color: var(--navy); margin-top: 4pt; }
+  .pay .k, .plan .k { font-size: 6.4pt; color: var(--muted); margin-bottom: 2pt; }
+  .pay .plan .p { display: grid; grid-template-columns: 1fr 22pt 58pt; gap: 4pt; padding: 2.4pt 0; border-bottom: .4pt solid var(--line); }
+  .pay .plan .p span:nth-child(n+2) { text-align: right; }
+  .pay .plan .p span:nth-child(2) { color: var(--gold-ink); font-weight: 600; }
+  .pay .plan .p span:last-child { color: var(--navy); font-weight: 600; }
+  .pay p { line-height: 1.5; }
+  .pay .qr { border: .6pt solid var(--navy); padding: 4pt; text-align: center; font-size: 6pt; color: var(--muted); line-height: 1.3; }
+  .pay .qr svg { display: block; margin: 0 auto 2pt; }
+
+  .terms { display: grid; grid-template-columns: 1fr 1fr; gap: 12pt; }
+  .terms li { list-style: none; padding: 2.4pt 0 2.4pt 9pt; border-bottom: .4pt solid var(--line); position: relative; }
+  .terms li::before { content: ''; position: absolute; left: 0; top: .9em; width: 3pt; height: 3pt; background: var(--gold); transform: rotate(45deg); }
+  .terms .trade { background: var(--card); border-left: 2pt solid var(--gold); padding: 7pt 10pt; }
+  .terms .trade .k { font-size: 6.4pt; color: var(--muted); }
+  .terms .trade .v { font-family: 'Playfair Display', serif; font-size: 10pt; color: var(--navy); line-height: 1.3; }
+
+  .sign { display: grid; grid-template-columns: 1fr 1fr; gap: 14pt; margin-top: 14pt; }
+  .sign > div { border: .6pt solid var(--line); padding: 6pt 8pt; height: 62pt; display: flex; flex-direction: column; justify-content: space-between; }
+  .sign .k { font-size: 6.4pt; color: var(--muted); }
+  .sign .v { color: var(--navy); font-weight: 600; border-top: .6pt solid var(--navy); padding-top: 3pt; }
+  .notinv { margin-top: 10pt; text-align: center; font-size: 7pt; color: var(--navy); }
+  .notinv span { display: inline-block; padding: 3pt 10pt; border-top: .6pt solid var(--gold); border-bottom: .6pt solid var(--gold); }
+</style>
+</head>
+<body>
+<script src="quote-143.js"></script>
+<script src="paginate.js"></script>
+<script>
+(function () {
+  const q = window.QUOTE, h = Pager.h, B = [];
+  const add = (html, o) => B.push(Object.assign({ el: h(html) }, o || {}));
+  const band = (t, aside) => `<div class="band"><h2>${t}</h2>${aside ? `<span>${aside}</span>` : ''}</div>`;
+  const th = `<div class="r th"><span>Item</span><span>Qty</span><span>Price</span><span>Discount</span><span>Net</span></div>`;
+
+  add(`<div class="parties">
+    <div><div class="k">Customer</div><div class="v">${q.customer.name}</div></div>
+    <div><div class="k">Offer made by</div><div class="v">${q.offerMadeBy.name}</div></div></div>`);
+  const specs = q.boat.key.filter((s) => s[0] !== 'Shipyard').concat(q.boat.specs.filter((s) => s[0] !== 'Engines' && s[0] !== 'Heads'));
+  add(`<div><div class="hero"><span>Hero image from boat gallery</span></div><div class="boat">
+    <div class="top"><div><h1>${q.boat.name}</h1><div class="hull">Hull no. ${q.boat.hull}, ${q.boat.builder}</div></div>
+      <div class="price"><div class="k">Base price excl. VAT</div><div class="v">${eur(q.boat.basePrice)}</div></div></div>
+    <dl>${specs.map((s) => `<div><dt>${s[0]}</dt><dd>${s[1]}</dd></div>`).join('')}</dl></div></div>`);
+
+  add(band('Optional equipment', `${q.itemCount} items, total <b>${eur(q.equipmentTotal)}</b>`), { keep: true });
+  add(th, { keep: true });
+  q.optional.forEach((c) => {
+    add(`<div class="ch"><span class="n">${c[0]}<span>${c[1].length} ${c[1].length === 1 ? 'item' : 'items'}</span></span><span class="s">Subtotal<b>${eur(c.subtotal)}</b></span></div>`, { keep: true });
+    c[1].forEach((it, i) => add(`<div class="r ${i === c[1].length - 1 ? 'last' : ''}"><span>${it[0]}</span><span>1</span><span>${eur(it[1])}</span><span class="d">–</span><span>${eur(it[1])}</span></div>`,
+      { keep: (i === 0 && c[1].length > 2) || i === c[1].length - 2, cont: () => h(`<div>${band('Optional equipment', 'continued')}${th}<div class="ch"><span class="n">${c[0]}<span>continued</span></span><span class="s"></span></div></div>`) }));
+  });
+  add(`<div class="eqsum"><span>Optional equipment total</span><b>${eur(q.equipmentTotal)}</b></div>`);
+
+  add(band('Price summary'), { keep: true });
+  add(`<div class="totals"><div class="lines">
+      <div class="l"><span>Base price</span><span>${eur(q.boat.basePrice)}</span></div>
+      <div class="l"><span>Optional equipment</span><span>${eur(q.equipmentTotal)}</span></div>
+      <div class="l"><span>Total list price excl. VAT</span><span>${eur(q.listTotal)}</span></div>
+      <div class="l disc"><span>Discount (${q.discount.boatPct} %)</span><span>${eur(-q.discountTotal)}</span></div>
+      <div class="l sub"><span>Boat ${q.discount.boatPct} %, equipment ${q.discount.equipmentPct} %, no per-item discounts</span><span>${eur(-q.boatDiscount)} / ${eur(-q.equipmentDiscount)}</span></div>
+      <div class="l net"><span>Net price excl. VAT</span><span>${eur(q.net)}</span></div>
+      <div class="l"><span>VAT ${q.vatPct} %</span><span>${eur(q.vat)}</span></div>
+    </div><div class="grand"><div class="k">Total incl. VAT</div><div class="v">${eur(q.gross)}</div>
+      <div class="x">Without VAT <b>${eur(q.net)}</b></div></div></div>`);
+
+  add(band('Standard equipment', 'Included in the base price'), { keep: true });
+  add(`<div class="std">${q.standard.map((g) => `<section><h3>${g[0]}</h3><ul>${g[1].map((i) => `<li>${i}</li>`).join('')}</ul></section>`).join('')}</div>`);
+
+  add(band('Payment'), { keep: true });
+  add(`<div><div class="plan">${q.paymentTerms.map((p) => `<div class="i"><span class="p">${p[1]} %</span><span class="a">${eur(q.gross * p[1] / 100)}</span><div class="k">${p[0]}</div></div>`).join('')}</div>
+  <div class="pay">
+    <div><div class="k">Recipient</div><p>${q.seller.name}<br>${q.seller.street}<br>${q.seller.city}<br>OIB: ${q.seller.oib}</p></div>
+    <div><div class="k">Bank details</div><p>IBAN: ${q.seller.iban}<br>BIC/SWIFT: ${q.seller.bic}<br>${q.seller.bank}<br>Reference: ${q.number}</p></div>
+    <div class="qr">${Pager.qr('52pt')}Scan to pay advance<br>${eur(q.deposit)}</div>
+  </div></div>`, { keep: true });
+
+  add(band('Terms of delivery'), { keep: true });
+  add(`<div class="terms"><ul>${q.deliveryTerms.map((t) => `<li>${t}</li>`).join('')}</ul>
+    <div class="trade"><div class="k">Trade-in</div><div class="v">${q.tradeIn.replace('Trade-in ', '')}</div></div></div>`, { keep: true });
+  add(`<div><div class="sign">
+    <div><span class="k">Signature for buyer</span><span class="v">${q.customer.name}</span></div>
+    <div><span class="k">Signature for seller</span><span class="v">${q.seller.name}</span></div>
+  </div><p class="notinv"><span>This quotation is not an invoice.</span></p></div>`);
+
+  Pager.run(q, B);
+})();
+</script>
+</body>
+</html>

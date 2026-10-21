@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quote NM-2026-143 – Variant B Structured Ledger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root { --navy: #1a1a2e; --blue: #2ea3f2; --gold: #c9a961; --ink: #262833; --muted: #6a6e7a; --line: #dfe3ea; --tint: #f3f5f8; --tint2: #f9fafc; }
+  .flow { color: var(--ink); font-size: 7.3pt; line-height: 1.42; font-variant-numeric: tabular-nums lining-nums; }
+
+  /* Ledger: rail + content on every block, so the rail rule runs down the page */
+  .blk { display: grid; grid-template-columns: 27mm 1fr; column-gap: 0; position: relative; }
+  .blk.float > .rail > * { position: relative; }
+  .blk.float > .rail { height: 0; overflow: visible; }
+  .blk.float { grid-template-rows: auto; }
+  .rail { border-right: .5pt solid var(--line); padding-right: 8pt; }
+  .main { padding-left: 10pt; min-width: 0; }
+  .blk.start { border-top: .9pt solid var(--navy); margin-top: 9pt; }
+  .blk.start > .rail, .blk.start > .main { padding-top: 6pt; }
+  .blk.first { margin-top: 0; }
+  .rail .no { color: var(--blue); font-weight: 700; font-size: 9pt; line-height: 1; }
+  .rail .t { color: var(--navy); font-weight: 600; font-size: 7.6pt; line-height: 1.25; margin-top: 3pt; }
+  .rail .c { color: var(--muted); font-size: 6.4pt; margin-top: 2pt; }
+  .k { color: var(--muted); font-size: 6.4pt; }
+  .pad-b { padding-bottom: 6pt; }
+
+  /* 1 Parties */
+  .parties { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10pt; }
+  .parties .v { font-weight: 600; color: var(--navy); font-size: 8.2pt; }
+
+  /* 2 Vessel + price at a glance */
+  .vessel { display: grid; grid-template-columns: 1fr 62mm; gap: 12pt; }
+  .vessel h1 { font-family: 'Playfair Display', serif; font-weight: 500; font-size: 19pt; color: var(--navy); line-height: 1.1; }
+  .vessel .sub { color: var(--muted); font-size: 7pt; margin: 2pt 0 7pt; }
+  .kv { display: grid; grid-template-columns: repeat(3, 1fr); column-gap: 10pt; }
+  .kv div { display: flex; flex-direction: column; padding: 2.4pt 0 2.6pt; border-bottom: .4pt solid var(--line); }
+  .kv div span:first-child { color: var(--muted); font-size: 6.2pt; }
+  .kv div span:last-child { color: var(--navy); font-weight: 500; }
+  .glance { border: .9pt solid var(--navy); }
+  .glance .hd { background: var(--navy); color: #fff; font-weight: 600; font-size: 7.4pt; padding: 4pt 7pt; display: flex; justify-content: space-between; }
+  .glance .hd span:last-child { color: rgba(255,255,255,.65); font-weight: 400; }
+  .glance .r { display: flex; justify-content: space-between; padding: 3pt 7pt; border-bottom: .4pt solid var(--line); }
+  .glance .r.disc span:last-child { color: #b03a2e; }
+  .glance .r.net { font-weight: 600; color: var(--navy); background: var(--tint); }
+  .glance .tot { display: flex; justify-content: space-between; align-items: baseline; padding: 6pt 7pt 5pt; border-top: .9pt solid var(--navy); }
+  .glance .tot .l { font-weight: 700; color: var(--navy); font-size: 7.6pt; }
+  .glance .tot .v { font-family: 'Playfair Display', serif; font-weight: 600; font-size: 14pt; color: var(--navy); }
+  .glance .ex { padding: 0 7pt 5pt; text-align: right; color: var(--muted); font-size: 6.4pt; }
+
+  /* 3 Ledger table */
+  .tr { display: grid; grid-template-columns: 16pt 1fr 18pt 50pt 40pt 54pt; column-gap: 6pt; padding: 1.9pt 4pt; align-items: baseline; }
+  .tr > :nth-child(n+3) { text-align: right; }
+  .tr .pos { color: var(--muted); font-size: 6.4pt; }
+  .tr .d { color: #b6bac3; }
+  .tr.zebra { background: var(--tint2); }
+  .tr.th { font-size: 6.3pt; color: var(--muted); border-bottom: .6pt solid var(--navy); padding-top: 0; }
+  .tr.cat { background: var(--tint); border-top: .4pt solid var(--line); margin-top: 3pt; font-weight: 600; color: var(--navy); }
+  .tr.cat .cnt { font-weight: 400; color: var(--muted); }
+  .tr.sum { border-top: .9pt solid var(--navy); font-weight: 700; color: var(--navy); margin-top: 3pt; padding-top: 4pt; }
+
+  /* 4 Price calculation */
+  .calc { display: grid; grid-template-columns: 1fr 72mm; gap: 14pt; }
+  .calc .lines .r { display: grid; grid-template-columns: 1fr auto 60pt; gap: 8pt; padding: 2.4pt 0; border-bottom: .4pt solid var(--line); }
+  .calc .lines .r span:nth-child(2) { color: var(--muted); text-align: right; }
+  .calc .lines .r span:last-child { text-align: right; }
+  .calc .lines .r.minus span:last-child { color: #b03a2e; }
+  .calc .lines .r.b { font-weight: 700; color: var(--navy); border-bottom: .9pt solid var(--navy); }
+  .calc .final { background: var(--navy); color: #fff; padding: 9pt 10pt; display: flex; flex-direction: column; justify-content: space-between; }
+  .calc .final .l { font-size: 7pt; color: rgba(255,255,255,.75); }
+  .calc .final .v { font-family: 'Playfair Display', serif; font-size: 19pt; color: #fff; line-height: 1.15; margin-top: 4pt; }
+  .calc .final .rule { height: 1pt; background: var(--gold); width: 22pt; margin: 6pt 0; }
+  .calc .final .ex { font-size: 6.6pt; color: rgba(255,255,255,.75); }
+  .calc .final .ex b { color: #fff; font-weight: 600; }
+
+  /* 5 Standard equipment: compact multi-column list */
+  .std { columns: 3; column-gap: 12pt; column-rule: .4pt solid var(--line); }
+  .std section { break-inside: avoid; margin-bottom: 6pt; }
+  .std h3 { font-size: 7.1pt; font-weight: 700; color: var(--navy); margin-bottom: 1.5pt; }
+  .std h3 span { font-weight: 400; color: var(--muted); }
+  .std li { list-style: none; font-size: 6.7pt; line-height: 1.42; color: var(--ink); }
+
+  /* 6 Payment */
+  .pay { display: grid; grid-template-columns: 1fr 1.2fr 60pt; gap: 12pt; align-items: start; }
+  .plan { display: grid; grid-template-columns: repeat(3, 1fr); border: .5pt solid var(--line); margin-bottom: 7pt; }
+  .plan .i { padding: 4pt 7pt; }
+  .plan .i + .i { border-left: .5pt solid var(--line); }
+  .plan .i .p { color: var(--blue); font-weight: 700; font-size: 9pt; }
+  .plan .i .a { color: var(--navy); font-weight: 600; float: right; margin-top: 2pt; }
+  .pay .plan .r { display: grid; grid-template-columns: 1fr 24pt 56pt; gap: 4pt; padding: 2.2pt 0; border-bottom: .4pt solid var(--line); }
+  .pay .plan .r span:nth-child(n+2) { text-align: right; }
+  .pay .plan .r span:last-child { font-weight: 600; color: var(--navy); }
+  .pay p { line-height: 1.5; }
+  .pay .qr { text-align: center; font-size: 6pt; color: var(--muted); line-height: 1.35; }
+  .pay .qr svg { display: block; margin: 0 auto 2pt; }
+
+  .terms { display: grid; grid-template-columns: 1fr 1fr; gap: 12pt; }
+  .terms li { list-style: none; padding: 2.2pt 0; border-bottom: .4pt solid var(--line); }
+  .terms .trade { border-left: 2pt solid var(--blue); background: var(--tint); padding: 5pt 8pt; color: var(--navy); font-weight: 600; }
+  .terms .trade .k { display: block; font-weight: 400; margin-bottom: 1pt; }
+
+  .sign { display: grid; grid-template-columns: 1fr 1fr; gap: 20pt; }
+  .sign .box { border: .5pt solid var(--line); height: 40pt; }
+  .sign .cap { display: flex; justify-content: space-between; margin-top: 3pt; font-size: 6.6pt; color: var(--muted); }
+  .sign .cap b { color: var(--navy); font-weight: 600; }
+  .note { margin-top: 10pt; padding-top: 5pt; border-top: .4pt solid var(--line); color: var(--muted); font-size: 6.8pt; display: flex; justify-content: space-between; }
+  .note b { color: var(--navy); font-weight: 600; }
+</style>
+</head>
+<body>
+<script src="quote-143.js"></script>
+<script src="paginate.js"></script>
+<script>
+(function () {
+  const q = window.QUOTE, h = Pager.h, B = [];
+  const add = (html, o) => B.push(Object.assign({ el: h(html) }, o || {}));
+  const rail = (no, t, c) => `<div class="rail">${no ? `<div class="no">${no}</div><div class="t">${t}</div>${c ? `<div class="c">${c}</div>` : ''}` : ''}</div>`;
+  const blk = (main, r, cls) => `<div class="blk ${cls || ''}">${r || rail()}<div class="main">${main}</div></div>`;
+
+  add(blk(`<div class="parties pad-b">
+      <div><div class="k">Customer</div><div class="v">${q.customer.name}</div></div>
+      <div><div class="k">Offer made by</div><div class="v">${q.offerMadeBy.name}</div><div class="k">${q.offerMadeBy.email}</div></div>
+      <div><div class="k">Quote</div><div class="v">${q.number}</div><div class="k">Valid until ${q.validUntil}</div></div>
+    </div>`, rail(1, 'Parties'), 'start first'));
+
+  const kv = q.boat.key.concat(q.boat.specs.filter((s) => s[0] !== 'Engines'));
+  add(blk(`<div class="vessel pad-b">
+      <div><h1>${q.boat.name}</h1><div class="sub">Hull no. ${q.boat.hull}, ${q.boat.builder}</div>
+        <div class="kv">${kv.map((s) => `<div><span>${s[0]}</span><span>${s[1]}</span></div>`).join('')}</div></div>
+      <div class="glance">
+        <div class="hd"><span>Price at a glance</span><span>EUR</span></div>
+        <div class="r"><span>Base price</span><span>${eur(q.boat.basePrice)}</span></div>
+        <div class="r"><span>Optional equipment (${q.itemCount})</span><span>${eur(q.equipmentTotal)}</span></div>
+        <div class="r"><span>Total list price</span><span>${eur(q.listTotal)}</span></div>
+        <div class="r disc"><span>Discount ${q.discount.boatPct} %</span><span>${eur(-q.discountTotal)}</span></div>
+        <div class="r net"><span>Net excl. VAT</span><span>${eur(q.net)}</span></div>
+        <div class="r"><span>VAT ${q.vatPct} %</span><span>${eur(q.vat)}</span></div>
+        <div class="tot"><span class="l">Total incl. VAT</span><span class="v">${eur(q.gross)}</span></div>
+        <div class="ex">Calculation in section 4</div>
+      </div></div>`, rail(2, 'Vessel', 'Base price excl. VAT<br>' + eur(q.boat.basePrice)), 'start'));
+
+  const th = `<div class="tr th"><span>No.</span><span>Item</span><span>Qty</span><span>Price</span><span>Discount</span><span>Net</span></div>`;
+  add(blk(th, rail(3, 'Optional equipment', `${q.itemCount} items in ${q.optional.length} categories`), 'start float'), { keep: true });
+  let pos = 0;
+  q.optional.forEach((c) => {
+    add(blk(`<div class="tr cat"><span></span><span>${c[0]} <span class="cnt">(${c[1].length})</span></span><span></span><span></span><span></span><span>${eur(c.subtotal)}</span></div>`), { keep: true });
+    c[1].forEach((it, i) => {
+      pos++;
+      add(blk(`<div class="tr ${i % 2 ? 'zebra' : ''}"><span class="pos">${pos}</span><span>${it[0]}</span><span>1</span><span>${eur(it[1])}</span><span class="d">–</span><span>${eur(it[1])}</span></div>`),
+        { keep: (i === 0 && c[1].length > 2) || i === c[1].length - 2, cont: () => h(blk(th + `<div class="tr cat"><span></span><span>${c[0]} <span class="cnt">(continued)</span></span></div>`, rail(3, 'Optional equipment', 'continued'), 'start first float')) });
+    });
+  });
+  add(blk(`<div class="tr sum"><span></span><span>Optional equipment total</span><span>${q.itemCount}</span><span></span><span></span><span>${eur(q.equipmentTotal)}</span></div>`));
+
+  add(blk(`<div class="calc pad-b"><div class="lines">
+      <div class="r"><span>Base price, ${q.boat.name}</span><span></span><span>${eur(q.boat.basePrice)}</span></div>
+      <div class="r"><span>Optional equipment</span><span>${q.itemCount} items</span><span>${eur(q.equipmentTotal)}</span></div>
+      <div class="r b"><span>Total list price excl. VAT</span><span></span><span>${eur(q.listTotal)}</span></div>
+      <div class="r minus"><span>Boat discount</span><span>${q.discount.boatPct} %</span><span>${eur(-q.boatDiscount)}</span></div>
+      <div class="r minus"><span>Equipment discount</span><span>${q.discount.equipmentPct} %</span><span>${eur(-q.equipmentDiscount)}</span></div>
+      <div class="r minus"><span>Per-item discounts</span><span>none</span><span>€0</span></div>
+      <div class="r b"><span>Net price excl. VAT</span><span></span><span>${eur(q.net)}</span></div>
+      <div class="r"><span>VAT</span><span>${q.vatPct} %</span><span>${eur(q.vat)}</span></div>
+    </div>
+    <div class="final"><div><div class="l">Total incl. VAT</div><div class="v">${eur(q.gross)}</div><div class="rule"></div></div>
+      <div class="ex">Price without VAT <b>${eur(q.net)}</b><br>Percentages are applied before fixed amounts.</div></div>
+    </div>`, rail(4, 'Price calculation'), 'start'));
+
+  add(blk(`<div class="std pad-b">${q.standard.map((g) => `<section><h3>${g[0]} <span>${g[1].length}</span></h3><ul>${g[1].map((i) => `<li>${i}</li>`).join('')}</ul></section>`).join('')}</div>`,
+    rail(5, 'Standard equipment', 'Included in the base price'), 'start'));
+
+  add(blk(`<div class="pad-b"><div class="k">Terms of payment</div><div class="plan">${q.paymentTerms.map((p) => `<div class="i"><span class="p">${p[1]} %</span><span class="a">${eur(q.gross * p[1] / 100)}</span><div class="k">${p[0]}</div></div>`).join('')}</div>
+    <div class="pay">
+      <div><div class="k">Recipient</div><p>${q.seller.name}<br>${q.seller.street}<br>${q.seller.city}<br>OIB: ${q.seller.oib}</p></div>
+      <div><div class="k">Bank details</div><p>IBAN: ${q.seller.iban}<br>BIC/SWIFT: ${q.seller.bic}<br>${q.seller.bank}<br>Reference: ${q.number}</p></div>
+      <div class="qr">${Pager.qr('54pt')}Scan to pay advance<br>${q.depositPct} %, ${eur(q.deposit)}</div>
+    </div></div>`, rail(6, 'Payment'), 'start'));
+
+  add(blk(`<div class="terms pad-b"><ul>${q.deliveryTerms.map((t) => `<li>${t}</li>`).join('')}</ul>
+      <div class="trade"><span class="k">Trade-in</span>${q.tradeIn.replace('Trade-in ', '')}</div></div>`, rail(7, 'Terms of delivery'), 'start'), { keep: true });
+  add(blk(`<div class="sign">
+      <div><div class="box"></div><div class="cap"><span>Signature for buyer</span><b>${q.customer.name}</b></div></div>
+      <div><div class="box"></div><div class="cap"><span>Signature for seller</span><b>${q.seller.name}</b></div></div>
+    </div><div class="note"><b>This quotation is not an invoice.</b><span>${q.number}, issued ${q.date}, valid until ${q.validUntil}</span></div>`,
+    rail(8, 'Acceptance'), 'start'));
+
+  Pager.run(q, B);
+})();
+</script>
+</body>
+</html>

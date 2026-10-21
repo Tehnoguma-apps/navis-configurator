@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quote PDF Redesign</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root { --navy: #1a1a2e; --gold: #c9a961; --blue: #2ea3f2; --ink: #2a2a2a; --muted: #656a78; --bg: #eef0f4; --card: #ffffff; --line: #dde0e7; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --ink: #e7e8ee; --muted: #a2a7b6; --bg: #12121f; --card: #1b1b2d; --line: #2c2c44; } }
+  :root[data-theme="dark"] { --ink: #e7e8ee; --muted: #a2a7b6; --bg: #12121f; --card: #1b1b2d; --line: #2c2c44; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--ink); font-family: 'Plus Jakarta Sans', system-ui, sans-serif; font-size: 15px; line-height: 1.55; }
+  header { max-width: 1320px; margin: 0 auto; padding: 40px 16px 24px; }
+  h1 { font-family: 'Playfair Display', serif; font-weight: 500; font-size: 34px; line-height: 1.15; }
+  header p { color: var(--muted); max-width: 70ch; margin-top: 8px; }
+  main { max-width: 1320px; margin: 0 auto; padding: 0 16px 56px; display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 20px; }
+  article { background: var(--card); border: 1px solid var(--line); border-top: 3px solid var(--gold); padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+  h2 { font-family: 'Playfair Display', serif; font-weight: 500; font-size: 22px; }
+  .meta { color: var(--muted); font-size: 13px; }
+  ul.points { padding-left: 18px; font-size: 14px; }
+  ul.points li { margin: 3px 0; }
+  .pages { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 4px; }
+  .pages a { display: block; border: 1px solid var(--line); background: #fff; }
+  .pages img { width: 100%; display: block; aspect-ratio: 210 / 297; object-fit: cover; }
+  .open { margin-top: auto; display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 18px; background: var(--navy); color: #fff; text-decoration: none; font-weight: 600; font-size: 14px; border: 1px solid var(--gold); }
+  .open:focus-visible, .pages a:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+  footer { max-width: 1320px; margin: 0 auto; padding: 0 16px 40px; color: var(--muted); font-size: 13px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Quote PDF redesign, three directions</h1>
+  <p>All three use the real data of quote NM-2026-143 (Azimut 70 Flybridge, 60 optional items, 17 % discount, 25 % VAT). Header and footer are the same as in the current PDF. Open a variant and print it to A4 to see the exact page breaks.</p>
+</header>
+<main>
+  <article>
+    <h2>A. Editorial</h2>
+    <div class="meta">4 pages</div>
+    <ul class="points">
+      <li>Large Playfair boat name with a wide hero image and a four-column spec grid.</li>
+      <li>Thin gold rules, italic category titles with item count and subtotal.</li>
+      <li>Price summary as a statement, total incl. VAT set large over a double gold rule.</li>
+      <li>Last page holds payment, terms of delivery and signatures.</li>
+    </ul>
+    <div class="pages">
+      <a href="variant-a.html"><img src="previews/variant-a-p1.png" alt="Variant A, page 1"></a>
+      <a href="variant-a.html"><img src="previews/variant-a-p3.png" alt="Variant A, page 3"></a>
+    </div>
+    <a class="open" href="variant-a.html">Open variant A</a>
+  </article>
+  <article>
+    <h2>B. Structured ledger</h2>
+    <div class="meta">3 pages, the most compact</div>
+    <ul class="points">
+      <li>Numbered sections in a left rail, so the reader always knows where they are.</li>
+      <li>"Price at a glance" box on page 1, next to the vessel specs.</li>
+      <li>Numbered item rows (1 to 60) for easy reference in negotiation.</li>
+      <li>Full price calculation shows boat, equipment and per-item discounts separately.</li>
+    </ul>
+    <div class="pages">
+      <a href="variant-b.html"><img src="previews/variant-b-p1.png" alt="Variant B, page 1"></a>
+      <a href="variant-b.html"><img src="previews/variant-b-p3.png" alt="Variant B, page 3"></a>
+    </div>
+    <a class="open" href="variant-b.html">Open variant B</a>
+  </article>
+  <article>
+    <h2>C. Navy premium</h2>
+    <div class="meta">4 pages</div>
+    <ul class="points">
+      <li>Navy section bands with a gold underline, boat block in navy with the base price in gold.</li>
+      <li>Each category is a card with its subtotal in the header.</li>
+      <li>Total incl. VAT in a navy panel, the net price without VAT below it.</li>
+      <li>Payment plan as three cards; payment, terms and signatures share the last page.</li>
+    </ul>
+    <div class="pages">
+      <a href="variant-c.html"><img src="previews/variant-c-p1.png" alt="Variant C, page 1"></a>
+      <a href="variant-c.html"><img src="previews/variant-c-p3.png" alt="Variant C, page 3"></a>
+    </div>
+    <a class="open" href="variant-c.html">Open variant C</a>
+  </article>
+</main>
+<footer>Hero images and the QR code are placeholders. Standard equipment, specifications and payment terms are sample content for the mockup.</footer>
+</body>
+</html>
