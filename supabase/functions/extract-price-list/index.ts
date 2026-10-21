@@ -76,7 +76,7 @@ const OPENAI_JSON_SCHEMA = {
   },
 }
 
-const SYSTEM_PROMPT = `You are a marine yacht price list extraction expert. Extract ALL data from the provided PDF price list.
+const SYSTEM_PROMPT = `You are a marine price list extraction expert (yachts, tenders and water toys). Extract ALL data from the provided PDF price list.
 
 Rules:
 - Extract the boat name, brand, model, year, and base price.
@@ -95,6 +95,14 @@ Rules:
 - All prices must be numbers in EUR (no currency symbols, no thousands separators).
 - If the PDF is in Italian, translate to English for _en fields and Croatian for _hr fields.
 - Spec categories MUST be capitalized: Dimensions, Engine, Performance, Capacity, Other.`
+
+// The JSON schema keeps the "boat" key for every product type (the DB table is
+// "boats"); this hint tells the model what kind of product the PDF describes.
+const PRODUCT_TYPE_HINTS: Record<'yacht' | 'tender' | 'toy', string> = {
+  yacht: 'This price list is for a yacht.',
+  tender: 'This price list is for a tender (a small boat carried by or serving a yacht). Treat the tender as the "boat".',
+  toy: 'This price list is for a water toy (e.g. Seabob, jet ski, e-foil). Treat the toy as the "boat"; engine/battery/range data go into specs.',
+}
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -140,7 +148,10 @@ Deno.serve(async (req) => {
     }
 
     // Parse request
-    const { pdf_base64 } = await req.json()
+    const { pdf_base64, product_type } = await req.json()
+    // Optional hint chosen by the user in the import modal. Unknown values fall back to 'yacht'.
+    const productType: 'yacht' | 'tender' | 'toy' =
+      product_type === 'tender' || product_type === 'toy' ? product_type : 'yacht'
     if (!pdf_base64) {
       return new Response(
         JSON.stringify({ error: 'Missing pdf_base64 field' }),
@@ -179,7 +190,7 @@ Deno.serve(async (req) => {
               },
               {
                 type: 'text',
-                text: 'Extract all boat information, specifications, and equipment from this price list PDF. Return structured JSON.',
+                text: `${PRODUCT_TYPE_HINTS[productType]} Extract all product information, specifications, and equipment from this price list PDF. Return structured JSON.`,
               },
             ],
           },

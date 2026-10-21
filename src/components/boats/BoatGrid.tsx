@@ -7,16 +7,17 @@ interface BoatGridProps {
   selectedBoatId?: string | null
   onSelectBoat?: (id: string) => void
   isPanelOpen?: boolean
+  showType?: boolean
 }
 
-export const BoatGrid = ({ boats, selectedBoatId, onSelectBoat, isPanelOpen }: BoatGridProps) => {
+export const BoatGrid = ({ boats, selectedBoatId, onSelectBoat, isPanelOpen, showType }: BoatGridProps) => {
   return (
     <div
       className={cn(
-        'grid gap-4',
+        'grid gap-2.5',
         isPanelOpen
-          ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
-          : 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'
+          ? 'grid-cols-2 xl:grid-cols-3'
+          : 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'
       )}
     >
       {boats.map((boat) => (
@@ -25,6 +26,7 @@ export const BoatGrid = ({ boats, selectedBoatId, onSelectBoat, isPanelOpen }: B
           boat={boat}
           isSelected={selectedBoatId === boat.id}
           onSelect={onSelectBoat}
+          showType={showType}
         />
       ))}
     </div>

@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import { getProductType } from '@/lib/catalog'
 import { Ship, Package, User, Calculator } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ds } from '@/lib/styles'
@@ -50,6 +51,7 @@ export function CompactReviewSummary({
 }: CompactReviewSummaryProps) {
   const { t, i18n } = useTranslation()
   const lang = i18n.language as 'hr' | 'en'
+  const productContext = getProductType(boat)
 
   const boatDiscounts = discounts.filter((d) => d.level === 'boat_base')
   const equipmentItemDiscounts = discounts.filter((d) => d.level === 'equipment_item')
@@ -97,7 +99,7 @@ export function CompactReviewSummary({
               {boatDiscounts.map((d) => (
                 <div key={d.id} className="flex justify-between text-xs">
                   <span className="text-muted-foreground">
-                    {d.description || t('configurator.boatDiscount')}
+                    {d.description || t('configurator.boatDiscount', { context: productContext })}
                   </span>
                   <span className="font-medium text-red-600">
                     {d.type === 'percentage'
@@ -162,11 +164,11 @@ export function CompactReviewSummary({
       </Card>
 
       {/* Boat & Client — top-right */}
-      <Card icon={User} title={`${t('configurator.boatDetails')} & ${t('configurator.clientInfo')}`}>
+      <Card icon={User} title={`${t('configurator.boatDetails', { context: productContext })} & ${t('configurator.clientInfo')}`}>
         <div className="grid gap-4 sm:grid-cols-2">
           {/* Boat side */}
           <div>
-            <p className={cn(ds.text.label, 'mb-1.5')}>{t('configurator.boatDetails')}</p>
+            <p className={cn(ds.text.label, 'mb-1.5')}>{t('configurator.boatDetails', { context: productContext })}</p>
             <div className="space-y-2">
               {boat.hero_image_url && (
                 <img

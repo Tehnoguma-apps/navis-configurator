@@ -107,6 +107,7 @@ export type Database = {
           id: string
           model: string | null
           name: string
+          product_type: string
           status: string
           updated_at: string
           year: number | null
@@ -124,6 +125,7 @@ export type Database = {
           id?: string
           model?: string | null
           name: string
+          product_type?: string
           status?: string
           updated_at?: string
           year?: number | null
@@ -141,6 +143,7 @@ export type Database = {
           id?: string
           model?: string | null
           name?: string
+          product_type?: string
           status?: string
           updated_at?: string
           year?: number | null
