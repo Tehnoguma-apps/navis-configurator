@@ -24,6 +24,8 @@ import {
 import { EquipmentCategoryForm } from '@/components/equipment/EquipmentCategoryForm'
 import { EquipmentItemForm } from '@/components/equipment/EquipmentItemForm'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
+import { ProductOptionGroups } from '@/components/catalog/ProductOptionGroups'
+import { getProductType } from '@/lib/catalog'
 import { SortableItem } from '@/components/ui/SortableItem'
 import type { EquipmentCategory, EquipmentCategoryWithItems, EquipmentItem } from '@/types'
 import type { EquipmentCategoryFormData, EquipmentItemFormData } from '@/lib/validators'
@@ -289,11 +291,10 @@ export const BoatEquipmentTab = ({ boatId, equipmentCategories, isAdmin }: BoatE
                 <option value="" disabled>
                   {t('equipment.copyFrom')}
                 </option>
-                {otherBoats.map((b) => (
-                  <option key={b.id} value={b.id}>
-                    {b.name}
-                  </option>
-                ))}
+                <ProductOptionGroups
+                  boats={otherBoats}
+                  preferredType={getProductType((allBoats ?? []).find((b) => b.id === boatId))}
+                />
               </select>
               <Copy className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
             </div>
